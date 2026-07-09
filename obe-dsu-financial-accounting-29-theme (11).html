@@ -1,0 +1,2079 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DHA Suffa University • OBE Analyzer (Upload Ready)</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.7.2/mammoth.browser.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/docx@8.5.0/build/index.umd.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+<style>
+  body { font-family: 'Inter', system_ui, sans-serif; transition: background-color .2s ease, color .2s ease; }
+  .dsu-maroon { color: #8B1538; }
+  .dsu-gold { color: #C9A227; }
+  .nav-active { border-bottom: 3px solid #8B1538; color: #8B1538; font-weight: 600; }
+  .metric { font-size: 1.85rem; line-height: 1; font-weight: 700; }
+  .level-badge { font-size: 0.7rem; padding: 1px 9px; border-radius: 9999px; font-weight: 700; }
+
+  /* ===== Light theme overrides ===== */
+  html.theme-light body { background-color: #f8fafc; color: #1e293b; }
+  html.theme-light .bg-slate-950 { background-color: #f8fafc !important; }
+  html.theme-light .bg-slate-900 { background-color: #ffffff !important; }
+  html.theme-light .bg-slate-800 { background-color: #f1f5f9 !important; }
+  html.theme-light .bg-slate-700 { background-color: #e2e8f0 !important; }
+  html.theme-light .bg-slate-600 { background-color: #cbd5e1 !important; }
+  html.theme-light .hover\:bg-slate-700:hover { background-color: #e2e8f0 !important; }
+  html.theme-light .hover\:bg-slate-600:hover { background-color: #cbd5e1 !important; }
+  html.theme-light .border-slate-800 { border-color: #e2e8f0 !important; }
+  html.theme-light .border-slate-700 { border-color: #cbd5e1 !important; }
+  html.theme-light .divide-slate-800 > :not([hidden]) ~ :not([hidden]) { border-color: #e2e8f0 !important; }
+  html.theme-light .text-slate-200 { color: #1e293b !important; }
+  html.theme-light .text-slate-300 { color: #334155 !important; }
+  html.theme-light .text-slate-400 { color: #64748b !important; }
+  html.theme-light .text-slate-500 { color: #64748b !important; }
+  html.theme-light .text-slate-600 { color: #475569 !important; }
+  html.theme-light .hover\:text-slate-200:hover { color: #0f172a !important; }
+  html.theme-light input, html.theme-light p[contenteditable] { color: #1e293b; }
+  html.theme-light input::placeholder { color: #94a3b8; }
+  html.theme-light #export-report-btn { background-color: #0f172a !important; color: #ffffff !important; }
+  html.theme-light #export-report-btn:hover { background-color: #1e293b !important; }
+  html.theme-light ::-webkit-scrollbar-track { background: #f1f5f9; }
+
+  /* Theme toggle switch */
+  .theme-toggle-btn { width: 42px; height: 42px; display:flex; align-items:center; justify-content:center; border-radius: 9999px; transition: background-color .2s ease; }
+</style>
+<script>
+  // Apply saved theme before content paints to avoid a flash of the wrong theme.
+  (function() {
+    try {
+      const saved = localStorage.getItem('obe-theme');
+      if (saved === 'light') document.documentElement.classList.add('theme-light');
+    } catch (e) {}
+  })();
+</script>
+</head>
+<body class="bg-slate-950 text-slate-200">
+<div class="max-w-screen-xl mx-auto">
+  <!-- Top Nav -->
+  <div class="border-b border-slate-800 bg-slate-900">
+    <div class="px-8 py-4 flex items-center justify-between">
+      <div class="flex items-center gap-x-4">
+        <img src="dsu-logo.png" alt="DHA Suffa University Logo" class="h-14 w-auto" onerror="this.style.display='none'; this.nextElementSibling.style.display='flex'">
+        <div class="hidden w-14 h-14 bg-[#8B1538] rounded-2xl items-center justify-center text-white text-3xl font-bold">DSU</div>
+        <div>
+          <div class="flex items-center gap-x-2">
+            <span class="font-bold text-3xl tracking-tighter dsu-maroon">DHA Suffa University</span>
+          </div>
+          <div class="text-xs font-medium text-[#C9A227]">LEARN TO DISCOVER • Karachi</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-x-3">
+        <div class="px-4 py-1.5 bg-slate-800 rounded-3xl text-sm flex items-center gap-x-2">
+          <i class="fa-solid fa-graduation-cap text-[#C9A227]"></i>
+          <span class="font-medium">OBE Analyzer • Upload Course + Student Data</span>
+        </div>
+        <button onclick="toggleTheme()" id="theme-toggle-btn" class="theme-toggle-btn bg-slate-800 hover:bg-slate-700" title="Toggle light / dark mode">
+          <i id="theme-toggle-icon" class="fa-solid fa-sun text-[#C9A227]"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="px-8 pt-6">
+    <div class="flex justify-between items-end mb-6">
+      <div>
+        <h1 class="text-4xl font-semibold tracking-tighter">OBE Analyzer</h1>
+        <p class="text-slate-400">Upload your Course Outline + Student Data • Instant OBE Attainment Reports</p>
+      </div>
+      <div class="flex gap-x-2 flex-wrap justify-end">
+        <button onclick="resetDemo()" class="px-4 py-2 text-sm bg-slate-800 hover:bg-slate-700 rounded-3xl flex items-center gap-x-2">
+          <i class="fa-solid fa-undo"></i> <span>Reset / Clear</span>
+        </button>
+        <label class="cursor-pointer px-4 py-2 text-sm bg-slate-800 hover:bg-slate-700 rounded-3xl flex items-center gap-x-2">
+          <i class="fa-solid fa-folder-open"></i> <span>Load Saved File</span>
+          <input type="file" id="load-progress-input" accept=".json" class="hidden" onchange="loadProgress(event)">
+        </label>
+        <button onclick="saveProgress()" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-3xl flex items-center gap-x-2">
+          <i class="fa-solid fa-floppy-disk"></i> <span>Save Progress</span>
+        </button>
+        <button onclick="saveToBrowser()" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-3xl flex items-center gap-x-2">
+          <i class="fa-solid fa-cloud-arrow-up"></i> <span>Save in Browser</span>
+        </button>
+        <button onclick="loadFromBrowser()" class="px-4 py-2 text-sm bg-slate-800 hover:bg-slate-700 rounded-3xl flex items-center gap-x-2">
+          <i class="fa-solid fa-cloud-arrow-down"></i> <span>Load from Browser</span>
+        </button>
+        <button onclick="downloadWordReport()" class="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 rounded-3xl flex items-center gap-x-2 text-white font-semibold">
+          <i class="fa-solid fa-file-word"></i> <span>Download Word Report (Course Folder)</span>
+        </button>
+        <button onclick="exportReport()" id="export-report-btn" class="px-5 py-2 text-sm bg-white text-slate-900 hover:bg-slate-100 rounded-3xl flex items-center gap-x-2 font-semibold">
+          <i class="fa-solid fa-download"></i> <span>Export Text Report</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-slate-800 mb-6 text-sm">
+      <button onclick="showTab(0)" class="tab-btn px-6 py-3 font-medium nav-active" data-tab="0">Course Outline</button>
+      <button onclick="showTab(1)" class="tab-btn px-6 py-3 font-medium text-slate-400 hover:text-slate-200" data-tab="1">Student Data</button>
+      <button onclick="showTab(2)" class="tab-btn px-6 py-3 font-medium text-slate-400 hover:text-slate-200" data-tab="2">OBE Dashboard</button>
+    </div>
+
+    <!-- TAB 0: Course Outline + Upload -->
+    <div id="tab-0" class="tab-content">
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+        <h3 class="font-semibold mb-4 flex items-center gap-x-2"><i class="fa-solid fa-book dsu-gold"></i> Course Details</h3>
+        <div class="flex gap-x-4 flex-wrap">
+          <div class="flex-1 min-w-[200px]">
+            <label class="text-xs text-slate-400">Course Name</label>
+            <p contenteditable="true" onblur="updateCourseField('name', this.innerText)" id="course-name-field" class="text-sm bg-slate-950 border border-slate-700 rounded-2xl px-3 py-2 mt-1 outline-none"></p>
+          </div>
+          <div class="flex-1 min-w-[150px]">
+            <label class="text-xs text-slate-400">Semester</label>
+            <p contenteditable="true" onblur="updateCourseField('semester', this.innerText)" id="course-semester-field" class="text-sm bg-slate-950 border border-slate-700 rounded-2xl px-3 py-2 mt-1 outline-none"></p>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-semibold flex items-center gap-x-2"><i class="fa-solid fa-upload dsu-gold"></i> Upload Course Outline</h3>
+          <div class="flex gap-x-2">
+            <label class="cursor-pointer px-4 py-2 text-sm bg-[#8B1538] hover:bg-[#6B0F2A] rounded-3xl flex items-center gap-x-2 text-white">
+              <i class="fa-solid fa-upload"></i> <span>Upload Course Outline (.docx)</span>
+              <input type="file" id="course-upload" accept=".docx" class="hidden" onchange="uploadCourseOutline(event)">
+            </label>
+          </div>
+        </div>
+        <p class="text-xs text-slate-400">Upload your Word (.docx) course outline. The app reads the CLO table, weekly outline table, and assessment table directly from the document.</p>
+        <p id="course-upload-status" class="text-xs text-slate-500 mt-2"></p>
+      </div>
+
+      <!-- Current CLOs -->
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-semibold">Course Learning Outcomes (CLOs)</h3>
+          <button onclick="addNewCLO()" class="text-xs px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl flex items-center gap-x-1 text-white">
+            <i class="fa-solid fa-plus fa-sm"></i> Add CLO
+          </button>
+        </div>
+        <div class="space-y-3" id="clo-list"></div>
+      </div>
+
+      <!-- Current Assessments -->
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-semibold">Assessment Plan &amp; OBE Mapping</h3>
+          <button onclick="addNewAssessment()" class="text-xs px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl flex items-center gap-x-1 text-white">
+            <i class="fa-solid fa-plus fa-sm"></i> Add Assessment
+          </button>
+        </div>
+        <table class="w-full text-sm">
+          <thead>
+            <tr class="text-slate-400 border-b border-slate-700">
+              <th class="text-left py-3">Assessment</th>
+              <th class="text-center">Max</th>
+              <th class="text-center">Weight %</th>
+              <th class="text-left pl-4">Questions</th>
+              <th class="text-left pl-4">Mapped to CLOs</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody id="assessment-table" class="divide-y divide-slate-800"></tbody>
+        </table>
+        <div id="weight-total-banner" class="mt-3 text-xs"></div>
+      </div>
+
+      <!-- 16-Week Course Outline -->
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-semibold">16-Week Course Outline</h3>
+          <button onclick="addNewWeek()" class="text-xs px-3 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-2xl flex items-center gap-x-1 text-white">
+            <i class="fa-solid fa-plus fa-sm"></i> Add Week
+          </button>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-700">
+                <th class="text-left py-3 w-14">Week</th>
+                <th class="text-left py-3">Topic</th>
+                <th class="text-left py-3 pl-4 w-32">Mapped CLO</th>
+                <th class="w-8"></th>
+              </tr>
+            </thead>
+            <tbody id="weekly-outline-table" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- TAB 1: Student Data Upload -->
+    <div id="tab-1" class="tab-content hidden">
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800">
+        <div class="flex justify-between items-center mb-4">
+          <h3 class="font-semibold">Student Marks</h3>
+          <div class="flex gap-x-2 flex-wrap">
+            <button onclick="downloadStudentTemplate()" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-3xl flex items-center gap-x-2">
+              <i class="fa-solid fa-download"></i> <span>Download CSV Template</span>
+            </button>
+            <button onclick="downloadStudentExcelTemplate()" class="px-4 py-2 text-sm bg-slate-700 hover:bg-slate-600 rounded-3xl flex items-center gap-x-2" title="Excel template with assessment/question headers and max marks - fill in student marks and upload it back">
+              <i class="fa-solid fa-file-excel"></i> <span>Download Excel Template</span>
+            </button>
+            <label class="cursor-pointer px-4 py-2 text-sm bg-emerald-600 hover:bg-emerald-700 rounded-3xl flex items-center gap-x-2 text-white">
+              <i class="fa-solid fa-upload"></i> <span>Upload Student CSV</span>
+              <input type="file" id="student-upload" accept=".csv" class="hidden" onchange="uploadStudentData(event)">
+            </label>
+            <label class="cursor-pointer px-4 py-2 text-sm bg-emerald-700 hover:bg-emerald-800 rounded-3xl flex items-center gap-x-2 text-white">
+              <i class="fa-solid fa-upload"></i> <span>Upload Student Excel</span>
+              <input type="file" id="student-upload-xlsx" accept=".xlsx,.xls" class="hidden" onchange="uploadStudentExcel(event)">
+            </label>
+            <button onclick="addStudent()" class="px-4 py-2 text-sm bg-[#8B1538] hover:bg-[#6B0F2A] rounded-3xl flex items-center gap-x-2 text-white">
+              <i class="fa-solid fa-user-plus"></i> <span>Add Row</span>
+            </button>
+            <button onclick="clearAllStudents()" class="px-4 py-2 text-sm bg-rose-600 hover:bg-rose-700 rounded-3xl flex items-center gap-x-2 text-white">
+              <i class="fa-solid fa-trash"></i> <span>Clear All</span>
+            </button>
+          </div>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead>
+              <tr class="bg-slate-800 text-slate-300" id="student-table-head">
+                <th class="text-left px-4 py-3">Student</th>
+                <th class="w-8"></th>
+              </tr>
+            </thead>
+            <tbody id="student-table" class="divide-y divide-slate-800"></tbody>
+          </table>
+        </div>
+
+        <div class="mt-4 flex justify-end gap-x-2">
+          <button onclick="saveProgress()" class="px-6 py-2.5 bg-slate-700 hover:bg-slate-600 rounded-3xl text-sm font-semibold flex items-center gap-x-2">
+            <i class="fa-solid fa-floppy-disk"></i> <span>Save Progress</span>
+          </button>
+          <button onclick="recalculateAll()" class="px-6 py-2.5 bg-[#8B1538] hover:bg-[#6B0F2A] rounded-3xl text-sm font-semibold flex items-center gap-x-2 text-white">
+            <i class="fa-solid fa-calculator"></i> <span>Calculate OBE Attainment</span>
+          </button>
+        </div>
+        <p id="student-table-hint" class="mt-2 text-xs text-slate-400"></p>
+      </div>
+    </div>
+
+    <!-- TAB 2: OBE Dashboard -->
+    <div id="tab-2" class="tab-content hidden">
+      <div id="overall-obe-card" class="mb-6"></div>
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-5 mb-6" id="clo-cards"></div>
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+        <h3 class="font-semibold mb-4">Attainment Chart</h3>
+        <div class="h-80"><canvas id="attainmentChart"></canvas></div>
+      </div>
+      <div id="failure-report"></div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// Default structure (can be overwritten by upload)
+let courseData = { name: "", semester: "" };
+
+// Empty by default - populated only when the user uploads a .docx course outline
+let clos = [];
+let assessments = [];
+let weeklyOutline = [];
+let students = []; // Empty by default - user uploads
+
+let attainmentChart = null;
+let currentThreshold = 70;
+
+// ---- Theme (light/dark) ----
+function isLightTheme() {
+  return document.documentElement.classList.contains('theme-light');
+}
+
+function setThemeToggleIcon() {
+  const icon = document.getElementById('theme-toggle-icon');
+  if (!icon) return;
+  icon.className = isLightTheme() ? 'fa-solid fa-moon text-[#8B1538]' : 'fa-solid fa-sun text-[#C9A227]';
+}
+
+function toggleTheme() {
+  document.documentElement.classList.toggle('theme-light');
+  try { localStorage.setItem('obe-theme', isLightTheme() ? 'light' : 'dark'); } catch (e) {}
+  setThemeToggleIcon();
+  // Re-render the attainment chart so its colors match the new theme
+  if (attainmentChart) renderDashboard();
+}
+
+// Tab switching
+function updateCourseField(field, text) {
+  courseData[field] = text.trim();
+}
+
+function showTab(tabIndex) {
+  document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+  document.querySelectorAll('.tab-btn').forEach((el, i) => {
+    if (i === tabIndex) el.classList.add('nav-active'); else el.classList.remove('nav-active');
+  });
+  document.getElementById(`tab-${tabIndex}`).classList.remove('hidden');
+  // Always rebuild the Student Data tab from the current CLOs/assessments/mappings
+  // set in the Course Outline tab, so it never shows stale attainment %.
+  if (tabIndex === 1) renderStudentTable();
+  if (tabIndex === 2) renderDashboard();
+}
+
+// Render functions
+function renderCLOList() {
+  const container = document.getElementById('clo-list');
+  container.innerHTML = '';
+  if (clos.length === 0) {
+    container.innerHTML = `<div class="text-center py-6 text-sm text-slate-500">No CLOs loaded yet. Upload your .docx course outline above, or click "Add CLO" to enter them manually.</div>`;
+    return;
+  }
+  clos.forEach((clo, index) => {
+    const div = document.createElement('div');
+    div.className = `flex gap-x-3 p-4 bg-slate-950 rounded-2xl border border-slate-700`;
+    div.innerHTML = `
+      <div contenteditable="true" onblur="updateCLOField(${index}, 'name', this.innerText)" class="w-10 h-10 flex-shrink-0 bg-[#8B1538] text-white rounded-2xl flex items-center justify-center text-xs font-bold outline-none text-center leading-tight px-1" title="Edit CLO label">${clo.name}</div>
+      <div class="flex-1">
+        <p contenteditable="true" onblur="updateCLOField(${index}, 'desc', this.innerText)" class="text-sm outline-none" title="Edit description">${clo.desc}</p>
+        <div class="flex gap-x-2 mt-1 text-[10px]">
+          <span contenteditable="true" onblur="updateCLOField(${index}, 'bloom', this.innerText)" class="px-2 py-0.5 bg-slate-800 rounded outline-none" title="Edit Bloom's level">${clo.bloom}</span>
+          <span contenteditable="true" onblur="updateCLOField(${index}, 'plo', this.innerText)" class="px-2 py-0.5 bg-slate-800 rounded outline-none" title="Edit mapped PLO">${clo.plo}</span>
+        </div>
+      </div>
+      <button onclick="deleteCLO(${index})" class="text-rose-400"><i class="fa-solid fa-trash fa-sm"></i></button>
+    `;
+    container.appendChild(div);
+  });
+}
+
+function updateCLOField(index, field, text) {
+  clos[index][field] = text.trim();
+  if (field === 'name') {
+    renderAssessmentTable();
+    renderWeeklyOutline();
+  }
+  // Any CLO edit (name, desc, bloom, plo) can affect what the Student Data tab
+  // shows (column labels, tooltips, attainment mapping), so keep it in sync.
+  renderStudentTable();
+}
+
+function addNewCLO() {
+  clos.push({ id: "clo" + (clos.length+1), name: "CLO-" + (clos.length+1), desc: "New learning outcome...", bloom: "Apply", plo: "New PLO" });
+  renderCLOList();
+  // Immediately reflect the new CLO as a column in the Student Data tab,
+  // and in the per-assessment CLO mapping inputs.
+  renderAssessmentTable();
+  renderStudentTable();
+}
+
+function deleteCLO(index) {
+  if (confirm("Delete this CLO?")) {
+    clos.splice(index,1);
+    renderCLOList();
+    // Remove the deleted CLO's column from the Student Data tab and
+    // its mapping inputs from the assessment table right away.
+    renderAssessmentTable();
+    renderStudentTable();
+  }
+}
+
+function renderWeightTotalBanner() {
+  const el = document.getElementById('weight-total-banner');
+  if (!el) return;
+  if (assessments.length === 0) { el.innerHTML = ''; return; }
+  const total = assessments.reduce((s, a) => s + (a.weight || 0), 0);
+  const ok = Math.abs(total - 100) < 0.5;
+  el.innerHTML = ok
+    ? `<span class="text-emerald-400"><i class="fa-solid fa-circle-check"></i> Assessment weights total ${total}% - correct.</span>`
+    : `<span class="text-rose-400"><i class="fa-solid fa-triangle-exclamation"></i> Assessment weights total ${total}%, not 100%. OBE attainment % will be inaccurate until this is fixed - edit the Weight % column above.</span>`;
+}
+
+function renderAssessmentTable() {
+  const tbody = document.getElementById('assessment-table');
+  tbody.innerHTML = '';
+  if (assessments.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6" class="text-center py-6 text-sm text-slate-500">No assessments loaded yet. Upload your .docx course outline above, or click "Add Assessment" to enter them manually.</td></tr>`;
+    renderWeightTotalBanner();
+    return;
+  }
+  assessments.forEach((ass, index) => {
+    const mappingHTML = clos.length
+      ? clos.map(clo => `
+          <label class="inline-flex items-center gap-x-1 mr-2 mb-1" title="% of ${clo.name} attainment this assessment contributes to">
+            <span class="text-[10px] text-slate-400">${clo.name}</span>
+            <input type="number" min="0" max="100" value="${ass.cloMapping[clo.id] || ''}" placeholder="0"
+              class="w-12 text-center bg-slate-800 rounded text-[10px] py-0.5"
+              onchange="updateAssessmentMapping(${index}, '${clo.id}', this.value)">
+          </label>
+        `).join('')
+      : `<span class="text-slate-600 text-xs">Add CLOs first</span>`;
+
+    const hasQuestions = ass.questions && ass.questions.length > 0;
+    const displayMax = hasQuestions ? getAssessmentMax(ass) : ass.max;
+
+    const questionsHTML = `
+      <div class="flex items-center gap-x-1 mb-1">
+        <input type="number" min="0" value="${ass.questions ? ass.questions.length : 0}"
+          class="w-12 text-center bg-slate-800 rounded text-xs py-0.5"
+          title="Number of questions for this assessment - auto-creates/removes them and they show up in the Student Data tab automatically"
+          onchange="setQuestionCount(${index}, this.value)">
+        <span class="text-[10px] text-slate-500">question(s)</span>
+      </div>
+      ${hasQuestions ? ass.questions.map((q, qi) => `
+        <label class="inline-flex items-center gap-x-1 mr-2 mb-1" title="Max marks (weightage) for ${q.name}">
+          <span class="text-[10px] text-slate-400">${q.name}</span>
+          <input type="number" min="0" value="${q.max}"
+            class="w-12 text-center bg-slate-800 rounded text-[10px] py-0.5"
+            onchange="updateQuestion(${index}, ${qi}, 'max', this.value)">
+        </label>
+      `).join('') : ''}
+    `;
+
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="py-2 px-4"><input value="${ass.name}" class="bg-transparent border-b border-slate-700 w-32" onchange="updateAssessment(${index},'name',this.value)"></td>
+      <td class="py-2 px-3 text-center">
+        <input type="number" value="${displayMax}" ${hasQuestions ? 'disabled title="Auto-calculated from question marks"' : ''} class="w-14 text-center bg-slate-800 rounded ${hasQuestions?'opacity-60':''}" onchange="updateAssessment(${index},'max',this.value)">
+      </td>
+      <td class="py-2 px-3 text-center"><input type="number" value="${ass.weight}" class="w-14 text-center bg-slate-800 rounded" onchange="updateAssessment(${index},'weight',this.value)"></td>
+      <td class="py-2 px-4 align-top">${questionsHTML}</td>
+      <td class="py-2 px-4">${hasQuestions ? `<span class="text-[10px] text-slate-500">Mapped per-question - edit in Student Data tab</span>` : mappingHTML}</td>
+      <td class="py-2 px-2"><button onclick="deleteAssessment(${index})" class="text-rose-400"><i class="fa-solid fa-trash fa-sm"></i></button></td>
+    `;
+    tbody.appendChild(row);
+  });
+  renderWeightTotalBanner();
+}
+
+function updateAssessment(index, field, val) {
+  if (field === 'name') {
+    assessments[index].name = val.trim() || assessments[index].name;
+  } else {
+    assessments[index][field] = parseFloat(val) || 0;
+  }
+  if (field === 'weight') renderWeightTotalBanner();
+  // Weight/max feed directly into each CLO's attainment % calculation, so
+  // refresh the Student Data tab's attainment columns right away.
+  renderStudentTable();
+}
+
+function updateAssessmentMapping(index, cloId, val) {
+  const pct = parseFloat(val);
+  if (!pct || pct <= 0) {
+    delete assessments[index].cloMapping[cloId];
+  } else {
+    assessments[index].cloMapping[cloId] = pct;
+  }
+  // The CLO mapping % is exactly what drives each student's per-CLO
+  // attainment in the Student Data tab - keep it in sync as soon as it's edited.
+  renderStudentTable();
+}
+
+function addNewAssessment() {
+  assessments.push({ id: "ass" + Date.now(), name: "New Assessment", max: 10, weight: 10, cloMapping: { clo1: 100 }, questions: [] });
+  renderAssessmentTable();
+  renderStudentTable();
+}
+
+function deleteAssessment(index) {
+  if (confirm("Delete assessment?")) { assessments.splice(index,1); renderAssessmentTable(); renderStudentTable(); }
+}
+
+// ---- Question-level marking ----
+// Questions (with their own max marks + CLO mapping) are managed from the Student
+// Data tab, under each student row, rather than from the Course Outline tab. The
+// question list/CLO mapping is shared across all students (it describes the
+// assessment structure), but is edited inline while looking at a student's marks.
+
+function getAssessmentMax(a) {
+  return (a.questions && a.questions.length)
+    ? a.questions.reduce((s, q) => s + (parseFloat(q.max) || 0), 0)
+    : (a.max || 0);
+}
+
+function addQuestionToAssessment(assIndex) {
+  const a = assessments[assIndex];
+  if (!a.questions) a.questions = [];
+  const qNum = a.questions.length + 1;
+  // Leave cloMapping empty - it will automatically inherit the assessment-level
+  // CLO weightage (set in the Course Outline tab) until the user explicitly
+  // overrides a specific CLO % for this question. See getEffectiveQuestionMapping().
+  const newQ = { id: "q" + Date.now() + Math.floor(Math.random()*1000), name: "Q" + qNum, max: 5, cloMapping: {} };
+  a.questions.push(newQ);
+  // Backfill a 0 mark for this new question on every existing student, and
+  // recompute that assessment's stored total so it stays consistent.
+  students.forEach(stu => {
+    if (!stu.qmarks) stu.qmarks = {};
+    if (!stu.qmarks[a.id]) stu.qmarks[a.id] = {};
+    if (stu.qmarks[a.id][newQ.id] === undefined) stu.qmarks[a.id][newQ.id] = 0;
+    if (!stu.marks) stu.marks = {};
+    stu.marks[a.id] = a.questions.reduce((s, q) => s + ((stu.qmarks[a.id][q.id]) || 0), 0);
+  });
+  renderAssessmentTable();
+  renderStudentTable();
+}
+
+// Lets the question count be set directly from the Course Outline tab (instead of
+// clicking "Add Question" repeatedly in the Student Data tab) - questions created
+// this way show up automatically in the Student Data tab since they share the
+// same assessments[].questions array.
+function setQuestionCount(assIndex, val) {
+  const a = assessments[assIndex];
+  if (!a.questions) a.questions = [];
+  const n = Math.max(0, Math.floor(parseFloat(val)) || 0);
+  if (n === a.questions.length) { renderAssessmentTable(); return; }
+
+  if (n > a.questions.length) {
+    const addCount = n - a.questions.length;
+    for (let i = 0; i < addCount; i++) {
+      const qNum = a.questions.length + 1;
+      const newQ = { id: "q" + Date.now() + Math.floor(Math.random()*1000) + i, name: "Q" + qNum, max: 5, cloMapping: {} };
+      a.questions.push(newQ);
+      students.forEach(stu => {
+        if (!stu.qmarks) stu.qmarks = {};
+        if (!stu.qmarks[a.id]) stu.qmarks[a.id] = {};
+        if (stu.qmarks[a.id][newQ.id] === undefined) stu.qmarks[a.id][newQ.id] = 0;
+      });
+    }
+  } else {
+    if (!confirm(`Reduce to ${n} question(s)? This removes the extra question(s) and their marks for all students.`)) { renderAssessmentTable(); return; }
+    while (a.questions.length > n) {
+      const removed = a.questions.pop();
+      students.forEach(stu => { if (stu.qmarks && stu.qmarks[a.id] && removed) delete stu.qmarks[a.id][removed.id]; });
+    }
+  }
+  students.forEach(stu => {
+    if (!stu.marks) stu.marks = {};
+    stu.marks[a.id] = a.questions.reduce((s, q) => s + ((stu.qmarks && stu.qmarks[a.id] && stu.qmarks[a.id][q.id]) || 0), 0);
+  });
+  renderAssessmentTable();
+  renderStudentTable();
+}
+
+function updateQuestion(assIndex, qIndex, field, val) {
+  const q = assessments[assIndex].questions[qIndex];
+  if (field === 'name') q.name = val.trim() || q.name;
+  else if (field === 'max') q.max = parseFloat(val) || 0;
+  renderAssessmentTable();
+  renderStudentTable();
+}
+
+function resetQuestionMappingToAuto(assIndex, qIndex) {
+  assessments[assIndex].questions[qIndex].cloMapping = {};
+  renderStudentTable();
+}
+
+function updateQuestionMapping(assIndex, qIndex, cloId, val) {
+  const a = assessments[assIndex];
+  const q = a.questions[qIndex];
+  if (!q.cloMapping) q.cloMapping = {};
+  // If this question was still fully auto-detected (inheriting from the assessment),
+  // freeze the current inherited values in first, so tweaking one CLO here doesn't
+  // blank out the auto-detected % on the other CLOs for this question.
+  if (Object.keys(q.cloMapping).length === 0 && a.cloMapping) {
+    q.cloMapping = { ...a.cloMapping };
+  }
+  const pct = parseFloat(val);
+  if (!pct || pct <= 0) delete q.cloMapping[cloId];
+  else q.cloMapping[cloId] = pct;
+  // Question-level CLO mapping % also drives attainment - sync the Student Data tab.
+  renderStudentTable();
+}
+
+function deleteQuestion(assIndex, qIndex) {
+  if (confirm("Delete this question? This removes it (and its marks) for all students.")) {
+    const a = assessments[assIndex];
+    const removed = a.questions.splice(qIndex, 1)[0];
+    students.forEach(stu => {
+      if (stu.qmarks && stu.qmarks[a.id] && removed) delete stu.qmarks[a.id][removed.id];
+      if (!stu.marks) stu.marks = {};
+      stu.marks[a.id] = a.questions.reduce((s, q) => s + ((stu.qmarks && stu.qmarks[a.id] && stu.qmarks[a.id][q.id]) || 0), 0);
+    });
+    renderAssessmentTable();
+    renderStudentTable();
+  }
+}
+
+function renderWeeklyOutline() {
+  const tbody = document.getElementById('weekly-outline-table');
+  if (!tbody) return;
+  tbody.innerHTML = '';
+  if (weeklyOutline.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="4" class="text-center py-6 text-sm text-slate-500">No weekly outline loaded yet. Upload your .docx course outline above, or click "Add Week" to enter rows manually.</td></tr>`;
+    return;
+  }
+  weeklyOutline.forEach((w, index) => {
+    const row = document.createElement('tr');
+    row.innerHTML = `
+      <td class="py-2"><input type="number" value="${w.week}" class="w-12 text-center bg-slate-800 rounded font-semibold text-[#C9A227]" onchange="updateWeekly(${index},'week',this.value)"></td>
+      <td class="py-2 pr-2"><p contenteditable="true" onblur="updateWeekly(${index},'topic',this.innerText)" class="outline-none">${w.topic}</p></td>
+      <td class="py-2 pl-4"><input value="${w.clo}" class="w-28 text-[10px] px-2 py-0.5 bg-slate-700 rounded" onchange="updateWeekly(${index},'clo',this.value)"></td>
+      <td class="py-2 pl-2"><button onclick="deleteWeekly(${index})" class="text-rose-400"><i class="fa-solid fa-trash fa-sm"></i></button></td>
+    `;
+    tbody.appendChild(row);
+  });
+}
+
+function updateWeekly(index, field, val) {
+  if (field === 'week') {
+    weeklyOutline[index].week = parseInt(val) || weeklyOutline[index].week;
+  } else {
+    weeklyOutline[index][field] = val.trim ? val.trim() : val;
+  }
+}
+
+function addNewWeek() {
+  const nextWeek = weeklyOutline.length ? Math.max(...weeklyOutline.map(w => w.week)) + 1 : 1;
+  weeklyOutline.push({ week: nextWeek, topic: "New topic...", clo: "CLO-1" });
+  renderWeeklyOutline();
+}
+
+function deleteWeekly(index) {
+  if (confirm("Delete this week?")) { weeklyOutline.splice(index,1); renderWeeklyOutline(); }
+}
+
+// ---- Unified mark-column model (assessment-level OR question-level) ----
+// A question automatically uses its parent assessment's CLO mapping % (set in
+// the Course Outline tab) unless the user has explicitly typed a CLO % on that
+// specific question - in which case that question's own mapping takes over
+// completely (for every CLO), so partial edits don't silently mix with inherited values.
+function getEffectiveQuestionMapping(a, q) {
+  const own = q.cloMapping || {};
+  return Object.keys(own).length > 0 ? own : (a.cloMapping || {});
+}
+
+function getMarkColumns() {
+  const cols = [];
+  assessments.forEach(a => {
+    if (a.questions && a.questions.length) {
+      const assMax = getAssessmentMax(a);
+      a.questions.forEach(q => {
+        cols.push({
+          assId: a.id, qid: q.id,
+          assName: a.name, qName: q.name,
+          label: `${a.name} - ${q.name}`,
+          max: parseFloat(q.max) || 0,
+          weight: a.weight || 0,
+          assessmentMax: assMax,
+          cloMapping: getEffectiveQuestionMapping(a, q)
+        });
+      });
+    } else {
+      cols.push({
+        assId: a.id, qid: null,
+        assName: a.name, qName: null,
+        label: a.name,
+        max: a.max || 0,
+        weight: a.weight || 0,
+        assessmentMax: a.max || 0,
+        cloMapping: a.cloMapping || {}
+      });
+    }
+  });
+  return cols;
+}
+
+function getColumnMark(stu, col) {
+  if (col.qid) {
+    return (stu.qmarks && stu.qmarks[col.assId] && stu.qmarks[col.assId][col.qid]) || 0;
+  }
+  return (stu.marks && stu.marks[col.assId]) || 0;
+}
+
+function setColumnMark(stu, col, val) {
+  const num = parseFloat(val) || 0;
+  if (col.qid) {
+    if (!stu.qmarks) stu.qmarks = {};
+    if (!stu.qmarks[col.assId]) stu.qmarks[col.assId] = {};
+    stu.qmarks[col.assId][col.qid] = num;
+    const a = assessments.find(x => x.id === col.assId);
+    if (!stu.marks) stu.marks = {};
+    if (a && a.questions && a.questions.length) {
+      stu.marks[col.assId] = a.questions.reduce((s, q) => s + ((stu.qmarks[col.assId][q.id]) || 0), 0);
+    }
+  } else {
+    if (!stu.marks) stu.marks = {};
+    stu.marks[col.assId] = num;
+  }
+}
+
+function updateStudentColumnMark(sIndex, ci, val) {
+  setColumnMark(students[sIndex], currentMarkColumns[ci], val);
+}
+
+let currentMarkColumns = [];
+const expandedStudents = new Set(); // tracks which student rows have their question-wise detail panel open
+
+function toggleStudentDetail(sIndex) {
+  if (expandedStudents.has(sIndex)) expandedStudents.delete(sIndex); else expandedStudents.add(sIndex);
+  renderStudentTable();
+}
+
+// Sets a specific student's mark for a specific question of a specific assessment,
+// and recomputes that assessment's stored total for this student.
+function updateStudentQuestionMark(sIndex, assIndex, qIndex, val) {
+  const stu = students[sIndex];
+  const a = assessments[assIndex];
+  const q = a.questions[qIndex];
+  const num = parseFloat(val) || 0;
+  if (!stu.qmarks) stu.qmarks = {};
+  if (!stu.qmarks[a.id]) stu.qmarks[a.id] = {};
+  stu.qmarks[a.id][q.id] = num;
+  if (!stu.marks) stu.marks = {};
+  stu.marks[a.id] = a.questions.reduce((s, qq) => s + ((stu.qmarks[a.id][qq.id]) || 0), 0);
+  renderStudentTable();
+}
+
+// Renders the expandable per-student panel: for every assessment, shows its
+// question-wise marks (for this student only) plus inline controls to add a
+// question, rename it, set its max marks, and edit which CLO(s) it maps to.
+// Adding/renaming/deleting a question or its CLO mapping applies to the whole
+// class (it describes the assessment structure), not just this one student -
+// the panel is just a convenient place to manage it while entering marks.
+function renderStudentDetailPanel(sIndex) {
+  const stu = students[sIndex];
+  let body = '';
+  assessments.forEach((a, aIdx) => {
+    const questions = a.questions || [];
+    let qRows = '';
+    questions.forEach((q, qIdx) => {
+      const mark = (stu.qmarks && stu.qmarks[a.id] && stu.qmarks[a.id][q.id]) || 0;
+      const ownMapping = q.cloMapping || {};
+      const isInherited = Object.keys(ownMapping).length === 0;
+      const effMapping = getEffectiveQuestionMapping(a, q);
+      const mappingHTML = clos.length
+        ? clos.map(clo => `
+            <label class="inline-flex items-center gap-x-1 mr-2 mb-1" title="${isInherited ? ('Auto-detected from ' + a.name + ' CLO mapping (Course Outline tab) - edit to override just this question') : 'Manually set for this question'}">
+              <span class="text-[10px] text-slate-400">${clo.name}</span>
+              <input type="number" min="0" max="100" value="${effMapping[clo.id] || ''}" placeholder="0"
+                class="w-12 text-center rounded text-[10px] py-0.5 ${isInherited ? 'bg-slate-800/50 text-slate-400 italic' : 'bg-slate-800'}"
+                onchange="updateQuestionMapping(${aIdx}, ${qIdx}, '${clo.id}', this.value)">
+            </label>
+          `).join('')
+        : `<span class="text-slate-600 text-xs">Add CLOs first</span>`;
+      const resetLinkHTML = (!isInherited && clos.length)
+        ? `<button onclick="resetQuestionMappingToAuto(${aIdx}, ${qIdx})" class="text-[9px] text-slate-500 hover:text-slate-300 underline ml-1" title="Clear manual override and go back to auto-detecting from ${a.name}'s CLO mapping">reset to auto</button>`
+        : '';
+      qRows += `
+        <tr class="border-b border-slate-800">
+          <td class="py-2 pr-2"><input value="${q.name}" class="w-16 bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs" onchange="updateQuestion(${aIdx}, ${qIdx}, 'name', this.value)"></td>
+          <td class="py-2 px-2 text-center"><input type="number" value="${q.max}" class="w-14 text-center bg-slate-900 border border-slate-700 rounded px-2 py-1 text-xs" onchange="updateQuestion(${aIdx}, ${qIdx}, 'max', this.value)"></td>
+          <td class="py-2 px-2 text-center"><input type="number" value="${mark}" class="w-16 text-center bg-slate-800 rounded px-2 py-1 text-xs font-semibold" onchange="updateStudentQuestionMark(${sIndex}, ${aIdx}, ${qIdx}, this.value)"></td>
+          <td class="py-2 px-2">${mappingHTML}${resetLinkHTML}</td>
+          <td class="py-2 px-2 text-center"><button onclick="deleteQuestion(${aIdx}, ${qIdx})" class="text-rose-400"><i class="fa-solid fa-trash fa-sm"></i></button></td>
+        </tr>`;
+    });
+    body += `
+      <div class="mb-4">
+        <div class="text-xs text-slate-400 mb-2 flex items-center justify-between">
+          <span class="font-semibold text-slate-200">${a.name}</span>
+          <button onclick="addQuestionToAssessment(${aIdx})" class="text-[10px] px-2 py-1 bg-emerald-600 hover:bg-emerald-700 rounded-xl flex items-center gap-x-1 text-white">
+            <i class="fa-solid fa-plus fa-sm"></i> Add Question
+          </button>
+        </div>
+        ${questions.length ? `
+        <table class="w-full text-xs">
+          <thead><tr class="text-slate-500"><th class="text-left pb-1">Question</th><th class="pb-1">Max</th><th class="pb-1">${stu.name}'s Mark</th><th class="text-left pl-2 pb-1">CLO Mapping %</th><th class="pb-1"></th></tr></thead>
+          <tbody>${qRows}</tbody>
+        </table>` : `<div class="text-xs text-slate-500 py-1">No questions yet for this assessment - click "Add Question" to break it into question-wise, CLO-mapped marks (applies to all students).</div>`}
+      </div>`;
+  });
+  return `
+    <tr>
+      <td colspan="99" class="bg-slate-950/60 px-4 py-4 rounded-2xl">
+        <div class="text-xs text-slate-400 mb-3"><i class="fa-solid fa-circle-info dsu-gold"></i> Question-wise marks for <strong>${stu.name}</strong> (${stu.id}). Question names, max marks, and CLO mapping apply to every student; only the mark itself is specific to ${stu.name}.</div>
+        ${body}
+      </td>
+    </tr>`;
+}
+
+// Student functions
+function renderStudentTable() {
+  const thead = document.getElementById('student-table-head');
+  const tbody = document.getElementById('student-table');
+  const hint = document.getElementById('student-table-hint');
+
+  currentMarkColumns = getMarkColumns();
+
+  // Build header dynamically from current assessments (one column per assessment;
+  // question-wise detail is edited in each student's expandable panel below).
+  const totalMax = assessments.reduce((s, a) => s + getAssessmentMax(a), 0);
+  let headHTML = `<th class="text-left px-4 py-3">Student</th>`;
+  assessments.forEach(a => {
+    const hasQuestions = a.questions && a.questions.length > 0;
+    headHTML += `<th class="px-2 py-3 text-center" title="${hasQuestions ? 'Auto-totaled from questions - expand the student row to edit question-wise' : ''}">${a.name}${hasQuestions ? ' <i class=\"fa-solid fa-list-ol fa-2xs text-slate-500\"></i>' : ''}<br><span class="text-[10px] text-slate-500 font-normal">/ ${getAssessmentMax(a)}</span></th>`;
+  });
+  headHTML += `<th class="px-2 py-3 text-center bg-slate-700/40">Total Marks<br><span class="text-[10px] text-slate-500 font-normal">/ ${totalMax}</span></th>`;
+  headHTML += `<th class="px-2 py-3 text-center bg-slate-700/40">Grade<br><span class="text-[10px] text-slate-500 font-normal">Letter / GPA</span></th>`;
+  clos.forEach(c => {
+    headHTML += `<th class="px-2 py-3 text-center" title="${c.desc || ''}">${c.name}<br><span class="text-[10px] text-slate-500 font-normal">Attainment</span></th>`;
+  });
+  headHTML += `<th class="px-2 py-3 text-center">OBE Attainment</th>`;
+  headHTML += `<th class="w-8"></th>`;
+  thead.innerHTML = headHTML;
+
+  tbody.innerHTML = '';
+  if (assessments.length === 0) {
+    tbody.innerHTML = `<tr><td class="text-center py-6 text-sm text-slate-500">Add assessments in the Course Outline tab first, then enter student marks here.</td></tr>`;
+  } else if (students.length === 0) {
+    tbody.innerHTML = `<tr><td class="text-center py-6 text-sm text-slate-500">No students yet. Click "Add Row" or upload a CSV.</td></tr>`;
+  } else {
+    students.forEach((student, sIndex) => {
+      const expanded = expandedStudents.has(sIndex);
+      let html = `<td class="px-4 py-2">
+        <input value="${student.name}" class="bg-transparent w-28 border-b border-slate-700" onchange="updateStudentName(${sIndex}, this.value)">
+        <br><span class="text-[10px] text-slate-500">${student.id}</span>
+        <br><button onclick="toggleStudentDetail(${sIndex})" class="mt-1 text-[10px] px-2 py-0.5 rounded-xl ${expanded ? 'bg-[#8B1538] text-white' : 'bg-slate-700 text-slate-300'} hover:opacity-90">
+          <i class="fa-solid fa-list-ol fa-xs"></i> Question Detail
+        </button>
+      </td>`;
+      let studentTotal = 0;
+      assessments.forEach(a => { studentTotal += (student.marks[a.id] || 0); });
+      assessments.forEach((a, aIdx) => {
+        const hasQuestions = a.questions && a.questions.length > 0;
+        const mark = student.marks[a.id] || 0;
+        html += hasQuestions
+          ? `<td class="px-1 py-2 text-center"><span class="inline-block w-[52px] text-center bg-slate-800/60 rounded py-1.5 text-slate-300">${mark}</span></td>`
+          : `<td class="px-1 py-2 text-center"><input type="number" value="${mark}" class="w-[52px] text-center bg-slate-800 rounded py-0.5" onchange="updateStudentMark(${sIndex}, '${a.id}', this.value)"></td>`;
+      });
+      const totalPct = totalMax > 0 ? Math.round((studentTotal / totalMax) * 100) : 0;
+      html += `<td class="px-2 py-2 text-center bg-slate-800/40">
+        <span class="font-semibold">${studentTotal}</span><span class="text-slate-500">/${totalMax}</span>
+        <br><span class="text-[10px] text-slate-400">${totalPct}%</span>
+      </td>`;
+
+      const grd = getGrade(totalPct);
+      const gc = gradeColor(grd.letter);
+      html += `<td class="px-2 py-2 text-center bg-slate-800/40">
+        <span class="inline-flex items-center px-2 py-0.5 rounded-2xl text-xs font-bold bg-${gc}-500/15 text-${gc}-400 border border-${gc}-500/30">
+          ${grd.letter}
+        </span>
+        <br><span class="text-[10px] text-slate-400">${grd.gp.toFixed(2)}</span>
+      </td>`;
+
+      if (clos.length > 0) {
+        const sa = computeStudentAttainment(student);
+        clos.forEach(c => {
+          const pct = sa.cloPct[c.id] || 0;
+          const lvl = getLevel(pct);
+          html += `<td class="px-2 py-2 text-center">
+            <span class="inline-flex items-center px-2 py-0.5 rounded-2xl text-[11px] font-semibold bg-${lvl.color}-500/15 text-${lvl.color}-400 border border-${lvl.color}-500/30">
+              ${pct}%
+            </span>
+          </td>`;
+        });
+        html += `<td class="px-2 py-2 text-center">
+          <span class="inline-flex items-center gap-x-1 px-2 py-1 rounded-2xl text-xs font-semibold bg-${sa.level.color}-500/15 text-${sa.level.color}-400 border border-${sa.level.color}-500/30">
+            ${sa.overall}% <span class="hidden sm:inline">• ${sa.level.label}</span>
+          </span>
+        </td>`;
+      } else {
+        html += `<td class="px-2 py-2 text-center text-xs text-slate-600">Add CLOs</td>`;
+      }
+      html += `<td><button onclick="deleteStudent(${sIndex})" class="text-rose-400 px-2"><i class="fa-solid fa-trash fa-sm"></i></button></td>`;
+      const row = document.createElement('tr');
+      row.innerHTML = html;
+      tbody.appendChild(row);
+
+      if (expanded) {
+        tbody.insertAdjacentHTML('beforeend', renderStudentDetailPanel(sIndex));
+      }
+    });
+  }
+
+  if (hint) {
+    hint.textContent = currentMarkColumns.length
+      ? `CSV columns: StudentID,Name,${currentMarkColumns.map(c => c.label.replace(/,/g,'')).join(',')}`
+      : '';
+  }
+}
+
+function updateStudentName(i, val) { students[i].name = val; }
+function updateStudentMark(i, key, val) { students[i].marks[key] = parseFloat(val) || 0; }
+
+function emptyMarks() {
+  const m = {};
+  assessments.forEach(a => m[a.id] = 0);
+  return m;
+}
+
+function emptyQMarks() {
+  const q = {};
+  assessments.forEach(a => {
+    if (a.questions && a.questions.length) {
+      q[a.id] = {};
+      a.questions.forEach(qq => q[a.id][qq.id] = 0);
+    }
+  });
+  return q;
+}
+
+function addStudent() {
+  if (assessments.length === 0) { alert("Add at least one assessment in the Course Outline tab first."); return; }
+  const newId = "DSU" + String(100 + students.length).padStart(3,'0');
+  students.push({ id: newId, name: "New Student", marks: emptyMarks(), qmarks: emptyQMarks() });
+  renderStudentTable();
+}
+function deleteStudent(i) {
+  if (confirm("Delete student?")) { students.splice(i,1); renderStudentTable(); }
+}
+function clearAllStudents() {
+  if (confirm("Clear all students?")) {
+    students = [];
+    renderStudentTable();
+    document.getElementById('clo-cards').innerHTML = '<div class="col-span-full text-center py-8 text-slate-400">Upload student data to see attainment.</div>';
+  }
+}
+
+// Robust download trigger - appends the link to the DOM before clicking, which
+// works more reliably across browsers and embedded/sandboxed preview contexts
+// than firing .click() on a detached element.
+function triggerDownload(blob, filename) {
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = filename;
+  a.style.display = 'none';
+  document.body.appendChild(a);
+  a.click();
+  setTimeout(() => {
+    document.body.removeChild(a);
+    URL.revokeObjectURL(url);
+  }, 1000);
+}
+
+// CSV Templates & Uploads
+function downloadStudentTemplate() {
+  if (assessments.length === 0) { alert("Add at least one assessment in the Course Outline tab first."); return; }
+  const cols = getMarkColumns();
+  const header = "StudentID,Name," + cols.map(c => c.label.replace(/,/g,'')).join(',');
+  const sampleRow = "DSU001,Ahmed Raza," + cols.map(() => 0).join(',');
+  const csv = header + "\n" + sampleRow;
+  const blob = new Blob([csv], {type:'text/csv'});
+  triggerDownload(blob, "Student_Marks_Template.csv");
+}
+
+function uploadStudentData(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (assessments.length === 0) { alert("Add at least one assessment in the Course Outline tab first."); e.target.value=''; return; }
+  const cols = getMarkColumns();
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    const lines = ev.target.result.trim().split('\n');
+    const newStudents = [];
+    for (let i=1; i<lines.length; i++) {
+      const vals = lines[i].split(',');
+      if (vals.length < 2 || !vals[0].trim()) continue;
+      const stu = { id: vals[0].trim(), name: (vals[1]||'').trim() || vals[0].trim(), marks: emptyMarks(), qmarks: emptyQMarks() };
+      cols.forEach((col, idx) => {
+        setColumnMark(stu, col, parseFloat(vals[2 + idx]) || 0);
+      });
+      newStudents.push(stu);
+    }
+    students = newStudents;
+    renderStudentTable();
+    alert(newStudents.length + " students loaded! (Columns matched: StudentID, Name, then one column per " + (cols.some(c=>c.qid) ? "assessment/question" : "assessment") + " in the order shown in the template.)");
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// Excel (.xlsx) template - multi-sheet, formula-driven:
+//  - One sheet per assessment that has individual questions (e.g. "Mid-Term Exam"),
+//    with a column per question (max marks in the header) and a Total column that's
+//    an Excel SUM formula across that row's questions.
+//  - The "Student Marks" overview sheet has one column per assessment. For assessments
+//    with their own question sheet, that column is an Excel VLOOKUP formula pulling the
+//    Total straight from that assessment's sheet (matched by Student ID, so row order
+//    between sheets doesn't matter) - i.e. it's genuinely integrated, not just a
+//    read-once snapshot. It also totals everything up into a Grand Total and Grand
+//    Total % column, both real formulas.
+// On upload, marks are read back question-wise from each assessment's own sheet (the
+// overview sheet's formula columns are just for the user to see while editing).
+const TEMPLATE_ROWS = 60; // blank student rows the template comes pre-formulated for
+
+function sanitizeSheetName(name, used) {
+  let n = String(name || 'Sheet').replace(/[\\\/\?\*\[\]:]/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 31) || 'Sheet';
+  if (n.toLowerCase() === 'history') n = 'Assessment';
+  let base = n, i = 2;
+  while (used.has(n.toLowerCase())) {
+    const suffix = ' ' + i;
+    n = base.slice(0, 31 - suffix.length) + suffix;
+    i++;
+  }
+  used.add(n.toLowerCase());
+  return n;
+}
+
+function downloadStudentExcelTemplate() {
+  if (assessments.length === 0) { alert("Add at least one assessment in the Course Outline tab first."); return; }
+  if (typeof XLSX === 'undefined') { alert("Excel library didn't load - check your internet connection and try again."); return; }
+
+  const usedNames = new Set(['student marks']);
+  const sheetNameByAssId = {};
+  const assessmentSheets = [];
+
+  // Every assessment gets its own sheet (Sheet 2, 3, ...). Assessments that already
+  // have questions defined in the app get one column per question; assessments with
+  // no questions defined yet get a single generic question column - either way each
+  // sheet has a Total column that auto-feeds the Student Marks overview sheet via a
+  // live VLOOKUP formula (matched by Student ID, so row order doesn't matter).
+  // Row 1 of each sheet is an info row showing the question count; row 2 is the
+  // real header, with each question column labelled "Q1 (Max ..)", "Q2 (Max ..)"
+  // etc so the marks are always clearly attached to a numbered question.
+  assessments.forEach(a => {
+    const qs = (a.questions && a.questions.length > 0) ? a.questions : [{ max: a.max }];
+    const sheetName = sanitizeSheetName(a.name, usedNames);
+    sheetNameByAssId[a.id] = sheetName;
+    const qCount = qs.length;
+    const totalMax = qs.reduce((s, q) => s + (parseFloat(q.max) || 0), 0);
+    const totalColIdx = 2 + qCount;
+    const infoRow = ["Assessment:", a.name, "Number of Questions:", qCount, "Total Max Marks:", totalMax];
+    const header = ["Student ID", "Name", ...qs.map((q, qi) => `Q${qi + 1} (Max ${q.max})`), `Total (Max ${totalMax})`];
+    const aoa = [infoRow, header];
+    for (let r = 0; r < TEMPLATE_ROWS; r++) {
+      aoa.push([r === 0 ? "DSU001" : "", r === 0 ? "Ahmed Raza" : "", ...qs.map(() => 0)]);
+    }
+    const ws = XLSX.utils.aoa_to_sheet(aoa);
+    const firstQCol = XLSX.utils.encode_col(2), lastQCol = XLSX.utils.encode_col(2 + qCount - 1);
+    const totalColLetter = XLSX.utils.encode_col(totalColIdx);
+    for (let r = 0; r < TEMPLATE_ROWS; r++) {
+      const rowNum = r + 3; // data starts on row 3 (row 1 = info, row 2 = header)
+      ws[totalColLetter + rowNum] = { t: 'n', f: `SUM(${firstQCol}${rowNum}:${lastQCol}${rowNum})` };
+    }
+    const range = XLSX.utils.decode_range(ws['!ref']);
+    range.e.c = Math.max(range.e.c, totalColIdx);
+    ws['!ref'] = XLSX.utils.encode_range(range);
+    ws['!cols'] = [{ wch: 12 }, { wch: 20 }, ...qs.map(() => ({ wch: 14 })), { wch: 14 }];
+    assessmentSheets.push({ name: sheetName, ws });
+  });
+
+  // Overview sheet: every assessment column is a live VLOOKUP formula pulling the
+  // Total straight from that assessment's own sheet, plus a Grand Total and
+  // Grand Total % formula column.
+  const totalPossible = assessments.reduce((s, a) => s + getAssessmentMax(a), 0);
+  const header1 = ["Student ID", "Name",
+    ...assessments.map(a => `${a.name} (Max ${getAssessmentMax(a)}) [Auto from '${sheetNameByAssId[a.id]}' sheet]`),
+    "Grand Total", "Grand Total %"
+  ];
+  const aoa1 = [header1];
+  for (let r = 0; r < TEMPLATE_ROWS; r++) {
+    aoa1.push([r === 0 ? "DSU001" : "", r === 0 ? "Ahmed Raza" : ""]);
+  }
+  const ws1 = XLSX.utils.aoa_to_sheet(aoa1);
+  const grandTotalCol = 2 + assessments.length;
+  const pctCol = grandTotalCol + 1;
+  for (let r = 0; r < TEMPLATE_ROWS; r++) {
+    const rowNum = r + 2;
+    assessments.forEach((a, ai) => {
+      const col = 2 + ai;
+      const colLetter = XLSX.utils.encode_col(col);
+      const sn = sheetNameByAssId[a.id].replace(/'/g, "''");
+      const qCount = (a.questions && a.questions.length > 0) ? a.questions.length : 1;
+      const totalColLetterOnSheet = XLSX.utils.encode_col(2 + qCount);
+      ws1[colLetter + rowNum] = { t: 'n', f: `IFERROR(VLOOKUP($A${rowNum},'${sn}'!$A$3:$${totalColLetterOnSheet}$${TEMPLATE_ROWS + 2},${3 + qCount},FALSE),0)` };
+    });
+    const grandTotalLetter = XLSX.utils.encode_col(grandTotalCol);
+    const firstMarkCol = XLSX.utils.encode_col(2), lastMarkCol = XLSX.utils.encode_col(grandTotalCol - 1);
+    ws1[grandTotalLetter + rowNum] = { t: 'n', f: `SUM(${firstMarkCol}${rowNum}:${lastMarkCol}${rowNum})` };
+    const pctLetter = XLSX.utils.encode_col(pctCol);
+    ws1[pctLetter + rowNum] = { t: 'n', f: `IF(${totalPossible}=0,0,ROUND(${grandTotalLetter}${rowNum}/${totalPossible}*100,1))` };
+  }
+  const range1 = XLSX.utils.decode_range(ws1['!ref']);
+  range1.e.c = Math.max(range1.e.c, pctCol);
+  ws1['!ref'] = XLSX.utils.encode_range(range1);
+  ws1['!cols'] = [{ wch: 12 }, { wch: 20 }, ...assessments.map(() => ({ wch: 30 })), { wch: 13 }, { wch: 14 }];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws1, "Student Marks");
+  assessmentSheets.forEach(s => XLSX.utils.book_append_sheet(wb, s.ws, s.name));
+  XLSX.writeFile(wb, "Student_Marks_Template.xlsx");
+}
+
+function findHeaderRowIndex(rows) {
+  const idx = rows.findIndex(r => r.some(cell => String(cell).trim().toLowerCase().replace(/\s+/g, '') === 'studentid'));
+  return idx === -1 ? 0 : idx;
+}
+
+// Reads back a filled-in Excel template. Flat assessment marks and the student roster
+// come from the "Student Marks" sheet; question-wise marks for assessments that have
+// their own sheet are pulled from that sheet directly (matched by Student ID) so
+// per-question CLO mapping still works exactly - the overview sheet's formula columns
+// are for the user's viewing/checking, not re-parsed.
+function uploadStudentExcel(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  if (assessments.length === 0) { alert("Add at least one assessment in the Course Outline tab first."); e.target.value=''; return; }
+  if (typeof XLSX === 'undefined') { alert("Excel library didn't load - check your internet connection and try again."); e.target.value=''; return; }
+
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const wb = XLSX.read(new Uint8Array(ev.target.result), { type: 'array' });
+      const sheet1Name = wb.SheetNames.find(n => n.toLowerCase() === 'student marks') || wb.SheetNames[0];
+      const rows1 = XLSX.utils.sheet_to_json(wb.Sheets[sheet1Name], { header: 1, defval: '' });
+      const hIdx1 = findHeaderRowIndex(rows1);
+      const headerRow1 = rows1[hIdx1] || [];
+
+      const roster = {};
+      for (let i = hIdx1 + 1; i < rows1.length; i++) {
+        const row = rows1[i];
+        const id = String((row && row[0]) || '').trim();
+        if (!id) continue;
+        const name = String((row && row[1]) || '').trim() || id;
+        roster[id] = { name };
+      }
+
+      // Every assessment now lives on its own sheet - read Total (or per-question
+      // marks, for assessments that have real questions defined) from there.
+      const marksByAssId = {};
+      assessments.forEach((a, ai) => {
+        const headerColIdx = 2 + ai;
+        const hintMatch = String(headerRow1[headerColIdx] || '').match(/\[Auto from '(.+)' sheet\]/);
+        let targetSheetName = hintMatch && wb.SheetNames.includes(hintMatch[1]) ? hintMatch[1] : null;
+        if (!targetSheetName) {
+          targetSheetName = wb.SheetNames.find(n => n.toLowerCase() === a.name.trim().toLowerCase())
+            || wb.SheetNames.find(n => n !== sheet1Name && a.name.trim().toLowerCase().startsWith(n.toLowerCase()));
+        }
+        if (!targetSheetName) { marksByAssId[a.id] = null; return; }
+        const rows = XLSX.utils.sheet_to_json(wb.Sheets[targetSheetName], { header: 1, defval: '' });
+        const hIdx = findHeaderRowIndex(rows);
+        const sheetHeaderRow = rows[hIdx] || [];
+        // Detect every "Q1 (Max ..)", "Q2 (Max ..)" ... column by its header text
+        // (plus the "Total" column as a fallback), so any question columns added
+        // directly in the sheet - even ones the app doesn't know about yet - are
+        // picked up rather than silently ignored.
+        const qCols = [];
+        let totalColIdx = -1;
+        sheetHeaderRow.forEach((cell, ci) => {
+          const text = String(cell || '').trim();
+          const qMatch = text.match(/^Q(\d+)\b/i);
+          if (qMatch) {
+            const maxMatch = text.match(/Max\s*([\d.]+)/i);
+            qCols.push({ num: parseInt(qMatch[1], 10), col: ci, max: maxMatch ? parseFloat(maxMatch[1]) : null });
+          } else if (/^Total\b/i.test(text)) {
+            totalColIdx = ci;
+          }
+        });
+        qCols.sort((x, y) => x.num - y.num);
+
+        // Sync this assessment's question list to whatever's actually in the
+        // sheet - matched by position (Q1, Q2, ...) - so a question added
+        // directly in Excel shows up in the app after upload instead of
+        // being dropped. Existing CLO mapping is preserved when the question
+        // at that position already existed.
+        if (qCols.length > 0) {
+          a.questions = qCols.map((qc, qi) => {
+            const existing = a.questions && a.questions[qi];
+            return existing
+              ? { ...existing, name: "Q" + qc.num, max: (qc.max != null ? qc.max : existing.max) }
+              : { id: "q" + Date.now() + Math.floor(Math.random() * 1000) + qi, name: "Q" + qc.num, max: (qc.max != null ? qc.max : 0), cloMapping: {} };
+          });
+        }
+
+        const hasRealQuestions = a.questions && a.questions.length > 0;
+        const map = {};
+        for (let i = hIdx + 1; i < rows.length; i++) {
+          const row = rows[i];
+          const id = String((row && row[0]) || '').trim();
+          if (!id) continue;
+          if (hasRealQuestions && qCols.length > 0) {
+            map[id] = qCols.map(qc => parseFloat(row[qc.col]) || 0);
+          } else if (hasRealQuestions) {
+            // No Q-columns detected by header text (e.g. custom headers) - fall
+            // back to positional reading in the order the app already knows.
+            map[id] = a.questions.map((q, qi) => parseFloat(row[2 + qi]) || 0);
+          } else {
+            const col = totalColIdx !== -1 ? totalColIdx : 2;
+            map[id] = parseFloat(row[col]) || 0;
+          }
+        }
+        marksByAssId[a.id] = map;
+      });
+
+      const studentIds = Object.keys(roster);
+      if (studentIds.length === 0) {
+        alert("No student rows found on the 'Student Marks' sheet. Fill in Student ID for each row and try again.");
+        return;
+      }
+
+      const newStudents = studentIds.map(id => {
+        const r = roster[id];
+        const stu = { id, name: r.name, marks: emptyMarks(), qmarks: emptyQMarks() };
+        assessments.forEach(a => {
+          const map = marksByAssId[a.id];
+          const hasRealQuestions = a.questions && a.questions.length > 0;
+          if (hasRealQuestions) {
+            const marksArr = (map && map[id]) || a.questions.map(() => 0);
+            if (!stu.qmarks[a.id]) stu.qmarks[a.id] = {};
+            a.questions.forEach((q, qi) => { stu.qmarks[a.id][q.id] = marksArr[qi] || 0; });
+            stu.marks[a.id] = marksArr.reduce((s, v) => s + v, 0);
+          } else {
+            stu.marks[a.id] = (map && map[id]) || 0;
+          }
+        });
+        return stu;
+      });
+
+      students = newStudents;
+      renderAssessmentTable();
+      renderStudentTable();
+      const missing = assessments.filter(a => !marksByAssId[a.id]).map(a => a.name);
+      alert(newStudents.length + " students loaded from Excel! Marks (and any question columns you added in the sheet) were detected from each assessment's own sheet and totalled automatically."
+        + (missing.length ? ("\n\nCouldn't find a matching sheet for: " + missing.join(', ') + " - those were left at 0.") : ""));
+    } catch (err) {
+      alert("Couldn't read this Excel file: " + err.message + ". Make sure it's based on the downloaded template.");
+    }
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+}
+
+// Course Outline Upload - parses a real .docx file (CLO table, weekly outline table, assessment table)
+function parseCLORefs(text, totalClos) {
+  if (!text) return [];
+  const t = text.toLowerCase();
+  const nums = new Set();
+  if (t.includes('all clo')) {
+    const n = totalClos || 5;
+    for (let i = 1; i <= n; i++) nums.add(i);
+    return Array.from(nums);
+  }
+  const rangeMatch = t.match(/(\d+)\s*[-–—]\s*(\d+)/);
+  if (rangeMatch) {
+    const start = parseInt(rangeMatch[1]), end = parseInt(rangeMatch[2]);
+    for (let n = start; n <= end; n++) nums.add(n);
+  }
+  const allNums = t.match(/\d+/g);
+  if (allNums) allNums.forEach(n => nums.add(parseInt(n)));
+  return Array.from(nums).sort((a, b) => a - b);
+}
+
+function uploadCourseOutline(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const status = document.getElementById('course-upload-status');
+  if (status) status.textContent = 'Reading document...';
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    mammoth.convertToHtml({ arrayBuffer: ev.target.result })
+      .then(function(result) {
+        const doc = new DOMParser().parseFromString(result.value, 'text/html');
+        const tables = Array.from(doc.querySelectorAll('table'));
+
+        const newClos = [];
+        const newWeekly = [];
+        const newAssessments = [];
+        let extractedName = '';
+        let extractedSemester = '';
+
+        // Course outlines usually carry the course name/semester either in a
+        // key-value header table ("Course Title" | "Financial Accounting", etc.)
+        // or as plain labeled text near the top of the document. Check both.
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tr')).map(tr =>
+            Array.from(tr.querySelectorAll('th,td')).map(c => c.textContent.trim())
+          );
+          rows.forEach(r => {
+            if (r.length < 2 || !r[0]) return;
+            const key = r[0].toLowerCase().replace(/[:\s]+$/, '');
+            const val = (r[1] || '').trim();
+            if (!val) return;
+            if (!extractedName && /course\s*(title|name)/.test(key)) extractedName = val;
+            if (!extractedSemester && /semester|term/.test(key)) extractedSemester = val;
+          });
+        });
+        const bodyText = doc.body ? doc.body.textContent || '' : '';
+        if (!extractedName) {
+          const m = bodyText.match(/Course\s*(?:Title|Name)\s*[:\-]\s*([^\n\r]+)/i);
+          if (m) extractedName = m[1].trim();
+        }
+        if (!extractedSemester) {
+          const m = bodyText.match(/Semester\s*[:\-]\s*([^\n\r]+)/i);
+          if (m) extractedSemester = m[1].trim();
+        }
+        if (extractedName) courseData.name = extractedName;
+        if (extractedSemester) courseData.semester = extractedSemester;
+
+        tables.forEach(table => {
+          const rows = Array.from(table.querySelectorAll('tr')).map(tr =>
+            Array.from(tr.querySelectorAll('th,td')).map(c => c.textContent.trim())
+          );
+          if (rows.length < 2) return;
+          const header = rows[0].map(h => h.toLowerCase());
+          const headerJoined = header.join(' | ');
+
+          // CLO table: columns like Learning Outcome | Bloom's Level | Mapped PLO | CLO
+          if (headerJoined.includes('learning outcome') && header.some(h => h.includes('clo'))) {
+            rows.slice(1).forEach(r => {
+              if (r.length < 4 || !r[0]) return;
+              const [desc, bloom, plo, cloName] = r;
+              const numMatch = (cloName || '').match(/\d+/);
+              const num = numMatch ? parseInt(numMatch[0]) : newClos.length + 1;
+              newClos.push({
+                id: 'clo' + num,
+                name: cloName || ('CLO-' + num),
+                desc: desc || '',
+                bloom: bloom || '',
+                plo: plo || ''
+              });
+            });
+          }
+          // Weekly outline table: Week | Detailed Contents | Pre-Class Discussion | Mapped CLO
+          else if (header[0] && header[0].includes('week') && headerJoined.includes('mapped clo')) {
+            rows.slice(1).forEach(r => {
+              if (r.length < 4 || !r[0]) return;
+              const weekNum = parseInt(r[0]) || (newWeekly.length + 1);
+              newWeekly.push({
+                week: weekNum,
+                topic: (r[1] || '').split(':')[0] || r[1] || '',
+                clo: r[r.length - 1] || ''
+              });
+            });
+          }
+          // Assessment table: Assessment Component | Max Marks | Marks Obtained | CLO | CLO Contribution %
+          // (Weight %/Weightage column, if present, can appear anywhere in the header row.)
+          else if (headerJoined.includes('assessment') && headerJoined.includes('max marks')) {
+            const weightIdx = header.findIndex(h => h.includes('weight'));
+            const contribIdx = header.findIndex(h => h.includes('contribution'));
+            rows.slice(1).forEach(r => {
+              if (r.length < 4 || !r[0]) return;
+              const name = r[0];
+              const max = parseFloat(r[1]) || 0;
+              // Use an explicit Weight%/Weightage column if the outline has one.
+              // Otherwise fall back to Max Marks, but flag it so the user verifies/edits it -
+              // Max Marks is only a valid proxy for weight if marks already sum to 100.
+              let weight = max;
+              let weightIsAssumed = true;
+              if (weightIdx >= 0 && r[weightIdx]) {
+                const wVal = parseFloat(r[weightIdx].replace('%', ''));
+                if (!isNaN(wVal) && wVal > 0) { weight = wVal; weightIsAssumed = false; }
+              }
+              const cloCol = r.length >= 5 ? r[3] : r[r.length - 1];
+              const cloNums = parseCLORefs(cloCol, newClos.length || 5);
+              const cloMapping = {};
+              if (cloNums.length) {
+                // Prefer real per-CLO contribution % from the document if available and it
+                // has one number per mapped CLO; otherwise split evenly as a fallback.
+                let usedContrib = false;
+                if (contribIdx >= 0 && r[contribIdx]) {
+                  const contribNums = (r[contribIdx].match(/\d+(\.\d+)?/g) || []).map(Number);
+                  if (contribNums.length === cloNums.length) {
+                    cloNums.forEach((n, i) => cloMapping['clo' + n] = contribNums[i]);
+                    usedContrib = true;
+                  }
+                }
+                if (!usedContrib) {
+                  const pct = Math.round(100 / cloNums.length);
+                  cloNums.forEach(n => cloMapping['clo' + n] = pct);
+                }
+              }
+              newAssessments.push({
+                id: 'ass' + Date.now() + Math.floor(Math.random() * 1000),
+                name: name || 'Assessment',
+                max: max,
+                weight: weight,
+                weightIsAssumed,
+                cloMapping,
+                questions: []
+              });
+            });
+          }
+        });
+
+        if (newClos.length) clos = newClos;
+        if (newWeekly.length) weeklyOutline = newWeekly;
+        if (newAssessments.length) assessments = newAssessments;
+
+        const nameField = document.getElementById('course-name-field');
+        const semField = document.getElementById('course-semester-field');
+        if (nameField) nameField.innerText = courseData.name || '';
+        if (semField) semField.innerText = courseData.semester || '';
+
+        renderCLOList();
+        renderAssessmentTable();
+        renderWeeklyOutline();
+        renderStudentTable();
+
+        const assumedWeights = newAssessments.filter(a => a.weightIsAssumed);
+        if (status) {
+          const courseBit = extractedName || extractedSemester
+            ? `Course details: ${extractedName || '—'}${extractedSemester ? ' • ' + extractedSemester : ''}. `
+            : '';
+          status.textContent = newClos.length || newWeekly.length || newAssessments.length || extractedName || extractedSemester
+            ? `${courseBit}Loaded ${newClos.length} CLOs, ${newWeekly.length} weekly topics, and ${newAssessments.length} assessments from "${file.name}".`
+            : '';
+        }
+        if (!newClos.length && !newWeekly.length && !newAssessments.length) {
+          alert("Couldn't find a CLO table, weekly outline table, or assessment table in this document. Please check that it matches the expected course outline format.");
+        } else if (assumedWeights.length) {
+          alert(`Heads up: no "Weight %" column was found in the assessment table, so Weight % was set equal to Max Marks for ${assumedWeights.length} assessment(s): ${assumedWeights.map(a=>a.name).join(', ')}. Please check/edit the Weight % column in the Assessment Plan table so it reflects each assessment's real share of the course grade (all weights should add up to 100%) before calculating OBE attainment - otherwise the attainment % will be skewed.`);
+        }
+      })
+      .catch(function(err) {
+        console.error(err);
+        if (status) status.textContent = '';
+        alert('Could not read this .docx file: ' + err.message);
+      });
+  };
+  reader.readAsArrayBuffer(file);
+  e.target.value = '';
+}
+
+// OBE Calculation - now question-wise where questions are defined, so a CLO's
+// attainment is built from the exact question(s) mapped to it (falls back to
+// whole-assessment mapping for assessments with no question breakdown).
+function calculateAttainment() {
+  const results = {};
+  const cols = getMarkColumns();
+  clos.forEach(clo => {
+    const cloId = clo.id;
+    let cloWeight = 0;
+    cols.forEach(col => {
+      const f = (col.cloMapping[cloId] || 0) / 100;
+      if (f > 0 && col.assessmentMax > 0) cloWeight += (col.weight || 0) * (col.max / col.assessmentMax) * f;
+    });
+
+    let attained = 0, total = 0;
+    students.forEach(stu => {
+      let w = 0;
+      cols.forEach(col => {
+        const f = (col.cloMapping[cloId] || 0) / 100;
+        if (f > 0 && col.assessmentMax > 0 && col.max > 0) {
+          const pct = (getColumnMark(stu, col) / col.max) * 100;
+          w += pct * (col.weight || 0) * (col.max / col.assessmentMax) * f;
+        }
+      });
+      const pct = cloWeight > 0 ? w / cloWeight : 0;
+      total += pct;
+      if (pct >= currentThreshold) attained++;
+    });
+    const att = students.length > 0 ? Math.round(attained / students.length * 100) : 0;
+    const avg = students.length > 0 ? Math.round(total / students.length) : 0;
+    results[cloId] = { attainment: att, avg, level: getLevel(att) };
+  });
+  return results;
+}
+
+// Per-student attainment: % per CLO and an overall weighted score for that individual student
+function computeStudentAttainment(stu) {
+  const cloPct = {};
+  let totalWeight = 0, totalWeighted = 0;
+  const cols = getMarkColumns();
+  clos.forEach(clo => {
+    let w = 0, cloWeight = 0;
+    cols.forEach(col => {
+      const f = (col.cloMapping[clo.id] || 0) / 100;
+      if (f > 0 && col.assessmentMax > 0) {
+        cloWeight += (col.weight || 0) * (col.max / col.assessmentMax) * f;
+        if (col.max > 0) w += ((getColumnMark(stu, col) / col.max) * 100) * (col.weight || 0) * (col.max / col.assessmentMax) * f;
+      }
+    });
+    const pct = cloWeight > 0 ? Math.round(w / cloWeight) : 0;
+    cloPct[clo.id] = pct;
+    totalWeight += cloWeight;
+    totalWeighted += pct * cloWeight;
+  });
+  const overall = totalWeight > 0 ? Math.round(totalWeighted / totalWeight) : 0;
+  return { cloPct, overall, level: getLevel(overall) };
+}
+
+// Builds the list of students who fell below the attainment threshold for each CLO,
+// together with the specific question(s)/assessment(s) that dragged them down -
+// this is what answers "which student failed which CLO, and on which question".
+function computeFailureReport(threshold) {
+  const cols = getMarkColumns();
+  const report = {};
+  clos.forEach(clo => { report[clo.id] = []; });
+  students.forEach(stu => {
+    const sa = computeStudentAttainment(stu);
+    clos.forEach(clo => {
+      const pct = sa.cloPct[clo.id] || 0;
+      if (pct < threshold) {
+        const weak = [];
+        cols.forEach(col => {
+          const f = (col.cloMapping[clo.id] || 0) / 100;
+          if (f > 0 && col.max > 0) {
+            const obtained = getColumnMark(stu, col);
+            const qpct = Math.round((obtained / col.max) * 100);
+            if (qpct < threshold) weak.push({ label: col.label, obtained, max: col.max, pct: qpct });
+          }
+        });
+        report[clo.id].push({ id: stu.id, name: stu.name, pct, weak });
+      }
+    });
+  });
+  return report;
+}
+
+function getLevel(p) {
+  if (p>=85) return {label:"Excellent", color:"emerald"};
+  if (p>=70) return {label:"Good", color:"amber"};
+  if (p>=60) return {label:"Satisfactory", color:"yellow"};
+  return {label:"Needs Improvement", color:"rose"};
+}
+
+// DSU Marks-to-Letter-Grade scale
+const DSU_GRADE_SCALE = [
+  { min: 86, max: 100, grade: "A",  gp: 4.00 },
+  { min: 80, max: 85,  grade: "A-", gp: 3.67 },
+  { min: 76, max: 79,  grade: "B+", gp: 3.33 },
+  { min: 72, max: 75,  grade: "B",  gp: 3.00 },
+  { min: 68, max: 71,  grade: "B-", gp: 2.67 },
+  { min: 64, max: 67,  grade: "C+", gp: 2.50 },
+  { min: 60, max: 63,  grade: "C",  gp: 2.00 },
+  { min: 57, max: 59,  grade: "C-", gp: 1.67 },
+  { min: 54, max: 56,  grade: "D+", gp: 1.33 },
+  { min: 50, max: 53,  grade: "D",  gp: 1.00 },
+  { min: 0,  max: 49,  grade: "F",  gp: 0.00 }
+];
+function getGrade(pct) {
+  const p = Math.round(pct);
+  const row = DSU_GRADE_SCALE.find(r => p >= r.min && p <= r.max) || DSU_GRADE_SCALE[DSU_GRADE_SCALE.length - 1];
+  return { letter: row.grade, gp: row.gp };
+}
+function gradeColor(letter) {
+  if (letter === 'A' || letter === 'A-') return 'emerald';
+  if (letter === 'B+' || letter === 'B' || letter === 'B-') return 'amber';
+  if (letter === 'C+' || letter === 'C' || letter === 'C-') return 'yellow';
+  if (letter === 'D+' || letter === 'D') return 'orange';
+  return 'rose';
+}
+
+function renderDashboard() {
+  const data = calculateAttainment();
+
+  // Overall class OBE attainment = average attainment across all CLOs
+  const overallCard = document.getElementById('overall-obe-card');
+  if (overallCard) {
+    if (clos.length === 0) {
+      overallCard.innerHTML = '';
+    } else {
+      const overallAtt = Math.round(clos.reduce((sum, c) => sum + (data[c.id]?.attainment || 0), 0) / clos.length);
+      const overallAvg = Math.round(clos.reduce((sum, c) => sum + (data[c.id]?.avg || 0), 0) / clos.length);
+      const level = getLevel(overallAtt);
+      overallCard.innerHTML = `
+        <div class="bg-gradient-to-r from-[#8B1538] to-[#6B0F2A] rounded-3xl p-6 border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-4">
+          <div>
+            <div class="text-xs uppercase tracking-wide text-white/70 font-medium">Overall Class OBE Attainment</div>
+            <div class="text-sm text-white/60 mt-1">${courseData.name} • ${students.length} student${students.length===1?'':'s'} • Threshold ${currentThreshold}%</div>
+          </div>
+          <div class="flex items-center gap-x-6">
+            <div class="text-right">
+              <div class="flex items-baseline justify-end"><span class="text-5xl font-bold text-white">${overallAtt}</span><span class="text-2xl text-white/80">%</span></div>
+              <div class="text-xs text-white/70">Class Average: ${overallAvg}%</div>
+            </div>
+            <span class="level-badge bg-${level.color}-500 text-white px-3 py-1.5">${level.label}</span>
+          </div>
+        </div>
+      `;
+    }
+  }
+
+  const container = document.getElementById('clo-cards');
+  container.innerHTML = '';
+  clos.forEach(clo => {
+    const d = data[clo.id] || {attainment:0, avg:0, level:{label:"No Data", color:"slate"}};
+    const card = document.createElement('div');
+    card.className = `bg-slate-900 border border-slate-700 rounded-3xl p-5`;
+    card.innerHTML = `
+      <div class="font-bold">${clo.name}</div>
+      <div class="text-xs text-slate-400 mb-3">${clo.bloom}</div>
+      <div class="flex items-baseline"><span class="metric">${d.attainment}</span><span class="text-xl">%</span></div>
+      <div class="h-2 bg-slate-800 rounded mt-2"><div class="h-2 bg-${d.level.color}-500 rounded" style="width:${d.attainment}%"></div></div>
+      <div class="text-xs mt-1 text-slate-400">Avg: ${d.avg}%</div>
+    `;
+    container.appendChild(card);
+  });
+
+  renderAttainmentChart(data);
+  renderFailureReport();
+}
+
+// Renders the "which student failed which CLO, on which question" drill-down table
+function renderFailureReport() {
+  const container = document.getElementById('failure-report');
+  if (!container) return;
+  if (clos.length === 0 || students.length === 0) { container.innerHTML = ''; return; }
+
+  const report = computeFailureReport(currentThreshold);
+  const anyFailures = clos.some(c => (report[c.id] || []).length > 0);
+
+  if (!anyFailures) {
+    container.innerHTML = `
+      <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+        <h3 class="font-semibold mb-2 flex items-center gap-x-2"><i class="fa-solid fa-magnifying-glass-chart dsu-gold"></i> Question-Wise CLO Failure Report</h3>
+        <div class="text-sm text-emerald-400"><i class="fa-solid fa-circle-check"></i> No students are below the ${currentThreshold}% threshold on any CLO.</div>
+      </div>`;
+    return;
+  }
+
+  let html = `
+    <div class="bg-slate-900 rounded-3xl p-6 border border-slate-800 mb-6">
+      <h3 class="font-semibold mb-1 flex items-center gap-x-2"><i class="fa-solid fa-magnifying-glass-chart dsu-gold"></i> Question-Wise CLO Failure Report</h3>
+      <p class="text-xs text-slate-400 mb-4">Students below the ${currentThreshold}% attainment threshold per CLO, with the exact question(s) in each assessment that pulled them down. ${currentMarkColumns.some(c=>c.qid) ? '' : 'Tip: break assessments into individual Questions (Course Outline tab) for a more precise, question-level breakdown.'}</p>`;
+
+  clos.forEach(clo => {
+    const rows = report[clo.id] || [];
+    if (!rows.length) return;
+    html += `
+      <div class="mb-5">
+        <div class="text-sm font-semibold mb-2 flex items-center gap-x-2">
+          <span class="w-7 h-7 flex-shrink-0 bg-[#8B1538] text-white rounded-xl flex items-center justify-center text-[10px] font-bold">${clo.name}</span>
+          <span>${clo.desc || ''}</span>
+          <span class="text-xs text-rose-400 font-normal">(${rows.length} student${rows.length>1?'s':''} below threshold)</span>
+        </div>
+        <div class="overflow-x-auto">
+          <table class="w-full text-xs">
+            <thead>
+              <tr class="text-slate-400 border-b border-slate-700">
+                <th class="text-left py-2 px-2">Student ID</th>
+                <th class="text-left py-2 px-2">Name</th>
+                <th class="text-center py-2 px-2">CLO %</th>
+                <th class="text-left py-2 px-2">Weak Question(s) / Assessment(s)</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-800">
+              ${rows.map(r => `
+                <tr>
+                  <td class="py-2 px-2">${r.id}</td>
+                  <td class="py-2 px-2">${r.name}</td>
+                  <td class="py-2 px-2 text-center"><span class="px-2 py-0.5 rounded-2xl bg-rose-500/15 text-rose-400 border border-rose-500/30 font-semibold">${r.pct}%</span></td>
+                  <td class="py-2 px-2">${r.weak.length ? r.weak.map(w => `<span class="inline-block mr-2 mb-1 px-2 py-0.5 bg-slate-800 rounded">${w.label}: ${w.obtained}/${w.max} (${w.pct}%)</span>`).join('') : '<span class="text-slate-600">No single question below threshold - shortfall spread across the CLO</span>'}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+      </div>`;
+  });
+
+  html += `</div>`;
+  container.innerHTML = html;
+}
+
+function renderAttainmentChart(data) {
+  const canvas = document.getElementById('attainmentChart');
+  if (!canvas || typeof Chart === 'undefined') return;
+
+  if (attainmentChart) {
+    attainmentChart.destroy();
+    attainmentChart = null;
+  }
+  if (clos.length === 0) return;
+
+  const labels = clos.map(c => c.name);
+  const attainmentValues = clos.map(c => data[c.id]?.attainment || 0);
+  const avgValues = clos.map(c => data[c.id]?.avg || 0);
+
+  const light = isLightTheme();
+  const tickColor = light ? '#475569' : '#94a3b8';
+  const gridColor = light ? '#e2e8f0' : '#1e293b';
+  const legendColor = light ? '#1e293b' : '#cbd5e1';
+
+  attainmentChart = new Chart(canvas.getContext('2d'), {
+    type: 'bar',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Attainment % (students ≥ threshold)',
+          data: attainmentValues,
+          backgroundColor: '#8B1538',
+          borderRadius: 6
+        },
+        {
+          label: 'Class Average %',
+          data: avgValues,
+          backgroundColor: '#C9A227',
+          borderRadius: 6
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      scales: {
+        y: {
+          beginAtZero: true,
+          max: 100,
+          ticks: { color: tickColor },
+          grid: { color: gridColor }
+        },
+        x: {
+          ticks: { color: tickColor },
+          grid: { display: false }
+        }
+      },
+      plugins: {
+        legend: { labels: { color: legendColor } }
+      }
+    }
+  });
+}
+
+
+function recalculateAll() {
+  if (clos.length === 0) { alert("Add CLOs in the Course Outline tab first."); return; }
+  if (assessments.length === 0) { alert("Add assessments in the Course Outline tab first."); return; }
+  if (students.length === 0) { alert("Add at least one student's marks first."); return; }
+  renderStudentTable();
+  showTab(2); // Switches to OBE Dashboard and renders it
+}
+
+// Save / Load Progress (JSON file - works regardless of browser storage restrictions)
+function saveProgress() {
+  const state = {
+    savedAt: new Date().toISOString(),
+    courseData,
+    clos,
+    assessments,
+    weeklyOutline,
+    students,
+    currentThreshold
+  };
+  const blob = new Blob([JSON.stringify(state, null, 2)], { type: 'application/json' });
+  const safeName = (courseData.name || 'OBE_Course').replace(/[^a-z0-9]+/gi, '_');
+  triggerDownload(blob, `${safeName}_progress.json`);
+}
+
+function loadProgress(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  const reader = new FileReader();
+  reader.onload = function(ev) {
+    try {
+      const state = JSON.parse(ev.target.result);
+      if (!state || typeof state !== 'object') throw new Error('Invalid file');
+
+      courseData = state.courseData || courseData;
+      clos = Array.isArray(state.clos) ? state.clos : [];
+      assessments = Array.isArray(state.assessments) ? state.assessments : [];
+      weeklyOutline = Array.isArray(state.weeklyOutline) ? state.weeklyOutline : [];
+      students = Array.isArray(state.students) ? state.students : [];
+      currentThreshold = typeof state.currentThreshold === 'number' ? state.currentThreshold : currentThreshold;
+
+      document.getElementById('course-name-field').innerText = courseData.name || '';
+      document.getElementById('course-semester-field').innerText = courseData.semester || '';
+      renderCLOList();
+      renderAssessmentTable();
+      renderWeeklyOutline();
+      renderStudentTable();
+      if (!document.getElementById('tab-2').classList.contains('hidden')) renderDashboard();
+
+      alert(`Progress loaded from "${file.name}"${state.savedAt ? ' (saved ' + new Date(state.savedAt).toLocaleString() + ')' : ''}.`);
+    } catch (err) {
+      console.error(err);
+      alert('Could not load this file. Please make sure it is a progress file saved from this app.');
+    }
+  };
+  reader.readAsText(file);
+  e.target.value = '';
+}
+
+// Save / Load in Browser (localStorage) - persists across sessions on this device/browser
+const BROWSER_SAVE_KEY = 'obe_dsu_saved_state_v1';
+
+function saveToBrowser() {
+  try {
+    const state = {
+      savedAt: new Date().toISOString(),
+      courseData, clos, assessments, weeklyOutline, students, currentThreshold
+    };
+    localStorage.setItem(BROWSER_SAVE_KEY, JSON.stringify(state));
+    alert('Saved in this browser. It will still be here next time you open this page on this device, until you clear it.');
+  } catch (err) {
+    console.error(err);
+    alert('Could not save in the browser (' + err.message + '). Your browser storage may be full or disabled (e.g. private/incognito mode).');
+  }
+}
+
+function loadFromBrowser() {
+  try {
+    const raw = localStorage.getItem(BROWSER_SAVE_KEY);
+    if (!raw) { alert('No saved data found in this browser.'); return; }
+    const state = JSON.parse(raw);
+
+    courseData = state.courseData || courseData;
+    clos = Array.isArray(state.clos) ? state.clos : [];
+    assessments = Array.isArray(state.assessments) ? state.assessments : [];
+    weeklyOutline = Array.isArray(state.weeklyOutline) ? state.weeklyOutline : [];
+    students = Array.isArray(state.students) ? state.students : [];
+    currentThreshold = typeof state.currentThreshold === 'number' ? state.currentThreshold : currentThreshold;
+
+    document.getElementById('course-name-field').innerText = courseData.name || '';
+    document.getElementById('course-semester-field').innerText = courseData.semester || '';
+    renderCLOList();
+    renderAssessmentTable();
+    renderWeeklyOutline();
+    renderStudentTable();
+    if (!document.getElementById('tab-2').classList.contains('hidden')) renderDashboard();
+
+    alert(`Loaded from browser storage${state.savedAt ? ' (saved ' + new Date(state.savedAt).toLocaleString() + ')' : ''}.`);
+  } catch (err) {
+    console.error(err);
+    alert('Could not load saved data from this browser (' + err.message + ').');
+  }
+}
+
+// Word (.docx) report - builds a genuine Office Open XML file with the docx.js
+// library, so it opens reliably in every version of Word (desktop, mobile,
+// Word Online) as well as Google Docs / LibreOffice. This replaced an older
+// "HTML saved with a .doc extension" trick, which some Word builds
+// (especially mobile/Word Online) refuse to open as it isn't a real .docx.
+async function downloadWordReport() {
+  if (clos.length === 0) { alert('Add CLOs in the Course Outline tab first.'); return; }
+  if (students.length === 0) { alert('Add student data in the Student Data tab first.'); return; }
+
+  if (typeof docx === 'undefined') {
+    alert('The Word library failed to load (likely a connection issue). Please check your internet connection and try again.');
+    return;
+  }
+
+  const { Document, Packer, Paragraph, TextRun, Table, TableRow, TableCell,
+          WidthType, AlignmentType, PageOrientation, HeadingLevel, ShadingType,
+          BorderStyle, VerticalAlign } = docx;
+
+  const MAROON = '8B1538';
+  const cols = getMarkColumns();
+  const totalMaxAll = assessments.reduce((s, a) => s + getAssessmentMax(a), 0);
+  const data = calculateAttainment();
+  const failureReport = computeFailureReport(currentThreshold);
+
+  const cellBorders = {
+    top: { style: BorderStyle.SINGLE, size: 2, color: '000000' },
+    bottom: { style: BorderStyle.SINGLE, size: 2, color: '000000' },
+    left: { style: BorderStyle.SINGLE, size: 2, color: '000000' },
+    right: { style: BorderStyle.SINGLE, size: 2, color: '000000' },
+  };
+
+  function headerCell(text) {
+    return new TableCell({
+      borders: cellBorders,
+      shading: { type: ShadingType.CLEAR, color: 'auto', fill: MAROON },
+      verticalAlign: VerticalAlign.CENTER,
+      children: [new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: String(text), bold: true, color: 'FFFFFF', size: 16 })]
+      })]
+    });
+  }
+
+  function dataCell(text, alignLeft) {
+    return new TableCell({
+      borders: cellBorders,
+      verticalAlign: VerticalAlign.CENTER,
+      children: [new Paragraph({
+        alignment: alignLeft ? AlignmentType.LEFT : AlignmentType.CENTER,
+        children: [new TextRun({ text: String(text ?? ''), size: 16 })]
+      })]
+    });
+  }
+
+  function buildTable(headerRow, rows, leftAlignFirstCol) {
+    return new Table({
+      width: { size: 100, type: WidthType.PERCENTAGE },
+      rows: [
+        new TableRow({ tableHeader: true, children: headerRow.map(h => headerCell(h)) }),
+        ...rows.map(r => new TableRow({
+          children: r.map((v, i) => dataCell(v, leftAlignFirstCol && i === 1))
+        }))
+      ]
+    });
+  }
+
+  // --- Table 1: Student-wise marks (question-wise where defined), grades & CLO attainment ---
+  const studentHeader = ['Student ID', 'Name',
+    ...cols.map(c => `${c.label} (/${c.max})`),
+    `Total (/${totalMaxAll})`, 'Total %', 'Grade', 'GPA',
+    ...clos.map(c => `${c.name} %`), 'OBE %', 'Level'];
+
+  const studentRows = students.map(stu => {
+    let totalScore = 0;
+    assessments.forEach(a => { totalScore += (stu.marks[a.id] || 0); });
+    const totalPct = totalMaxAll > 0 ? Math.round((totalScore / totalMaxAll) * 100) : 0;
+    const grd = getGrade(totalPct);
+    const sa = computeStudentAttainment(stu);
+    return [
+      stu.id, stu.name,
+      ...cols.map(c => getColumnMark(stu, c)),
+      `${totalScore}/${totalMaxAll}`, `${totalPct}%`, grd.letter, grd.gp.toFixed(2),
+      ...clos.map(c => `${sa.cloPct[c.id] || 0}%`),
+      `${sa.overall}%`, sa.level.label
+    ];
+  });
+
+  // --- Table 2: CLO attainment summary ---
+  const cloHeader = ['CLO', 'Description', "Bloom's Level", 'Mapped PLO', 'Attainment %', 'Class Avg %', 'Level'];
+  const cloRows = clos.map(c => {
+    const d = data[c.id] || { attainment: 0, avg: 0, level: { label: 'No Data' } };
+    return [c.name, c.desc || '', c.bloom || '', c.plo || '', `${d.attainment}%`, `${d.avg}%`, d.level.label];
+  });
+
+  // --- Table 3: Question bank reference (which question maps to which CLO, and its weight) ---
+  const questionBankHeader = ['Assessment', 'Question', 'Max Marks', 'Mapped CLO(s)'];
+  const questionBankRows = cols.map(c => {
+    const mapped = clos
+      .map(clo => (c.cloMapping[clo.id] ? `${clo.name} (${c.cloMapping[clo.id]}%)` : null))
+      .filter(Boolean)
+      .join(', ') || '—';
+    return [c.assName, c.qName || 'Whole assessment', c.max, mapped];
+  });
+
+  // --- Table 4: Question-wise CLO failure detail (students below threshold) ---
+  const failureHeader = ['CLO', 'Student ID', 'Name', 'CLO %', 'Weak Question(s) / Assessment(s)'];
+  const failureRows = [];
+  clos.forEach(c => {
+    (failureReport[c.id] || []).forEach(r => {
+      const weakText = r.weak.length
+        ? r.weak.map(w => `${w.label}: ${w.obtained}/${w.max} (${w.pct}%)`).join('; ')
+        : 'Shortfall spread across the CLO (no single question below threshold)';
+      failureRows.push([c.name, r.id, r.name, `${r.pct}%`, weakText]);
+    });
+  });
+
+  // --- Table 5: Grading scale ---
+  const gradeHeader = ['Marks', 'Letter Grade', 'Grade Points'];
+  const gradeRows = DSU_GRADE_SCALE.map(r => [
+    r.min === r.max ? `${r.min}` : `${r.min}-${r.max}`, r.grade, r.gp.toFixed(2)
+  ]);
+
+  const genDate = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' });
+
+  const doc = new Document({
+    sections: [{
+      properties: {
+        page: {
+          size: { orientation: PageOrientation.LANDSCAPE, width: 11906, height: 16838 }, // A4 portrait dims - docx.js swaps them for landscape
+          margin: { top: 680, bottom: 680, left: 680, right: 680 } // ~1.2cm
+        }
+      },
+      children: [
+        new Paragraph({
+          children: [new TextRun({ text: 'DHA Suffa University', bold: true, color: MAROON, size: 32 })]
+        }),
+        new Paragraph({
+          spacing: { after: 200 },
+          children: [new TextRun({
+            text: `Course: ${courseData.name || ''}   |   Semester: ${courseData.semester || ''}   |   Report: Student-wise OBE Attainment & Grade Report   |   Generated: ${genDate}   |   Total Students: ${students.length}`,
+            size: 18, color: '444444'
+          })]
+        }),
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 200, after: 100 },
+          children: [new TextRun({ text: '1. Student-Wise Marks, Grades & CLO Attainment', bold: true, color: MAROON, size: 22 })]
+        }),
+        buildTable(studentHeader, studentRows, true),
+
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 300, after: 100 },
+          children: [new TextRun({ text: '2. Course Learning Outcome (CLO) Attainment Summary', bold: true, color: MAROON, size: 22 })]
+        }),
+        buildTable(cloHeader, cloRows, true),
+
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 300, after: 100 },
+          children: [new TextRun({ text: '3. Question Bank Reference (Question → CLO Mapping)', bold: true, color: MAROON, size: 22 })]
+        }),
+        buildTable(questionBankHeader, questionBankRows, true),
+
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 300, after: 100 },
+          children: [new TextRun({ text: `4. Question-Wise CLO Failure Detail (Students Below ${currentThreshold}% Threshold)`, bold: true, color: MAROON, size: 22 })]
+        }),
+        failureRows.length
+          ? buildTable(failureHeader, failureRows, true)
+          : new Paragraph({ children: [new TextRun({ text: `No students are below the ${currentThreshold}% threshold on any CLO.`, size: 18, color: '15803d' })] }),
+
+        new Paragraph({
+          heading: HeadingLevel.HEADING_2,
+          spacing: { before: 300, after: 100 },
+          children: [new TextRun({ text: '5. DSU Grading Scale (Reference)', bold: true, color: MAROON, size: 22 })]
+        }),
+        buildTable(gradeHeader, gradeRows, false),
+
+        new Paragraph({
+          spacing: { before: 300 },
+          children: [new TextRun({ text: `Generated by DSU OBE Analyzer. Attainment threshold used: ${currentThreshold}%.`, size: 16, color: '444444' })]
+        }),
+      ]
+    }]
+  });
+
+  const safeName = (courseData.name || 'OBE_Course').replace(/[^a-z0-9]+/gi, '_');
+
+  try {
+    const blob = await Packer.toBlob(doc);
+    triggerDownload(blob, `${safeName}_Student_Report.docx`);
+  } catch (err) {
+    console.error('Word export failed:', err);
+    alert('Could not generate the Word file (' + err.message + '). Please check your internet connection and try again.');
+  }
+}
+
+function exportReport() {
+  const data = calculateAttainment();
+  const failureReport = computeFailureReport(currentThreshold);
+  let txt = `DHA SUFFA UNIVERSITY OBE REPORT\n${courseData.name}\n\n`;
+  clos.forEach(c => txt += `${c.name}: ${data[c.id]?.attainment || 0}%\n`);
+  txt += `\nStudents: ${students.length}\nThreshold: ${currentThreshold}%\n`;
+
+  txt += `\n--- QUESTION-WISE CLO FAILURE DETAIL (below ${currentThreshold}%) ---\n`;
+  let anyFailures = false;
+  clos.forEach(c => {
+    const rows = failureReport[c.id] || [];
+    if (!rows.length) return;
+    anyFailures = true;
+    txt += `\n${c.name} (${rows.length} student(s) below threshold):\n`;
+    rows.forEach(r => {
+      const weakText = r.weak.length ? r.weak.map(w => `${w.label}: ${w.obtained}/${w.max} (${w.pct}%)`).join('; ') : 'shortfall spread across CLO';
+      txt += `  - ${r.id} ${r.name} (${r.pct}%) — Weak: ${weakText}\n`;
+    });
+  });
+  if (!anyFailures) txt += `\nNo students are below the threshold on any CLO.\n`;
+
+  const blob = new Blob([txt], {type:'text/plain'});
+  triggerDownload(blob, "OBE_Report.txt");
+}
+
+function resetDemo() {
+  if (confirm("Clear everything and start fresh?")) {
+    students = [];
+    renderStudentTable();
+    document.getElementById('clo-cards').innerHTML = '';
+  }
+}
+
+function init() {
+  setThemeToggleIcon();
+  document.getElementById('course-name-field').innerText = courseData.name;
+  document.getElementById('course-semester-field').innerText = courseData.semester;
+  renderCLOList();
+  renderAssessmentTable();
+  renderWeeklyOutline();
+  renderStudentTable(); // Will be empty
+  showTab(0);
+  // Show helpful message on dashboard
+  setTimeout(() => {
+    const dash = document.getElementById('clo-cards');
+    if (dash && students.length === 0) {
+      dash.innerHTML = `<div class="col-span-full text-center py-8 text-slate-400">Upload student data from the Student Data tab to calculate attainment.</div>`;
+    }
+  }, 800);
+}
+
+init();
+</script>
+</body>
+</html>
